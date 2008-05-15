@@ -59,10 +59,7 @@ private slots:
 	void togleFullScreen();
 	void togleEscape();
 	void indentFirstLines();
-	void setStatsLabelText(int position, int charsRemoved, int charsAdded);
 	void documentWasModified();	
-	void cramStatsLabel();
-	void dateTimeStatsLabel();
 	void getFileStatus();
 	void readSettings();
 	void vPositionChanged();
@@ -97,6 +94,7 @@ private:
 	bool isScrollBarVisible;
 
 protected:
+	void paintEvent(QPaintEvent *);
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent *event);	
 };

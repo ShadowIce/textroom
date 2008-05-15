@@ -29,6 +29,16 @@
 #include <QTimer>
  
 #include "textroom.h"
+
+void TextRoom::paintEvent(QPaintEvent *)
+{
+int x = width();
+int y = height();
+int lefty = (y - 36);
+QPainter painter(this);
+painter.setBrush(QColor(32,32,32,255));
+painter.drawRect(0, lefty, x, y);
+}
  
 int main(int argc, char ** argv)
 {
