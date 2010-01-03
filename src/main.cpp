@@ -1,9 +1,12 @@
 /****************************************************************************
 ** Copyright (C) 2008 Petar Toushkov <peter dot toushkov at gmail.com>
+** Copyright (C) 2008 Omer Bahri Gordebak <gordebak at gmail.com>
 **
 ** Additional help, code and insights by:
 ** adamvert - from http://ubuntuforums.org/
 ** zebulon M - from http://ubuntuforums.org/
+**
+** Artwork by Edward Solorukhin <arch1000@gmail.com>
 **
 ** Parts of the following code are from the Phrasis project:
 **
@@ -27,9 +30,10 @@
 #include <QApplication>
 #include <QSplashScreen>
 #include <QTimer>
+#include <QtGui>
  
 #include "textroom.h"
- 
+
 int main(int argc, char ** argv)
 {
 	QApplication app(argc, argv);
@@ -53,19 +57,22 @@ int main(int argc, char ** argv)
 		{
 			splash = new QSplashScreen(splashpix);
 			splash->show();
-			splash->showMessage("[Press F1 for help]", Qt::AlignBottom+Qt::AlignHCenter, Qt::white);
+			splash->showMessage("Loading... ", Qt::AlignBottom+Qt::AlignRight, QColor(128,128,128));
 		}
 	}
+
+
 	
 	TextRoom *win = new TextRoom(NULL);
 	win->show();
+
 	
 	if (splash)
 	{
 		QTimer *timer = new QTimer(win);
 		QObject::connect(timer, SIGNAL(timeout()), splash, SLOT(close()));
+		timer->start(2000);
 		timer->setSingleShot(true);
-		timer->start(400);
 		//splash->finish(win);
 	}
 	return app.exec();

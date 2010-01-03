@@ -1,9 +1,12 @@
 /****************************************************************************
 ** Copyright (C) 2008 Petar Toushkov <peter dot toushkov at gmail.com>
+** Copyright (C) 2008 Omer Bahri Gordebak <gordebak at gmail.com>
 **
 ** Additional help, code and insights by:
 ** adamvert - from http://ubuntuforums.org/
 ** zebulon M - from http://ubuntuforums.org/
+**
+** Artwork by Edward Solorukhin <arch1000@gmail.com>
 **
 ** Parts of the following code are from the Phrasis project:
 **

@@ -1,9 +1,12 @@
 /****************************************************************************
 ** Copyright (C) 2008 Petar Toushkov <peter dot toushkov at gmail.com>
+** Copyright (C) 2008 Omer Bahri Gordebak <gordebak at gmail.com>
 **
 ** Additional help, code and insights by:
 ** adamvert - from http://ubuntuforums.org/
 ** zebulon M - from http://ubuntuforums.org/
+**
+** Artwork by Edward Solorukhin <arch1000@gmail.com>
 **
 ** Parts of the following code are from the Phrasis project:
 **
@@ -41,24 +44,23 @@ public:
 private slots:
 	void reaSettings();
 	void writSettings();
-	void activateApply();
-	void on_pushButtonOK_clicked();
-	void on_pushButtonApply_clicked();
-	void on_pbEditorColor_clicked();
+	void on_pushButtonOk_clicked();
+	void on_pbFontColor_clicked();
 	void on_pbEditorBackColor_clicked();
 	void on_pbStatusBarColor_clicked();
-	void on_pbScrollBarColor_clicked();
-	void showForegroundDialog();
+	void on_pbStatusBarBgColor_clicked();
+	void showFontColorDialog();
 	void showBackgroundDialog();
 	void showStatusColorDialog();
-	void showScrollBarColorDialog();
-	void changeScrollBarColorControlsState();
+	void showStatusBarBgColorDialog();
+	void startAlarm();
 
 private:
-	QColor fgcolor;
+	QColor fcolor;
 	QColor bgcolor;
 	QColor scolor;
 	QColor sbcolor;
+	int setAlarm;
 
 private:
 
