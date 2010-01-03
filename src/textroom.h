@@ -33,9 +33,6 @@
 #include <QtGui>
  
 #include "ui_textroom.h"
-#include "SDL/SDL.h"
-// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:  #include "SDL_mixer/SDL_mixer.h"
-#include "SDL/SDL_mixer.h"
 
 class QShortcut;
 class QFileSystemWatcher;
@@ -67,8 +64,8 @@ private slots:
 	void find_next();
 	void find_previous();
 	void sCursor();
-	void togleFullScreen();
-	void togleEscape();
+	void toggleFullScreen();
+	void toggleEscape();
 	void documentWasModified();	
 	void getFileStatus();
 	void readSettings();
@@ -88,7 +85,6 @@ private:
 	QString strippedName(const QString &fullFileName);
 	void clearFormating(const QTextBlock& block);	
 	void writeSettings();
-	void playSound(Mix_Chunk *sound);
 	bool saveFile(const QString &fileName);
 	void loadFile(const QString &fileName);
 	void setCurrentFile(const QString &fileName);
@@ -145,8 +141,8 @@ private:
 	const char *filename1_char;
 	const char *filename2_char;
 	int channel;
-	Mix_Chunk *soundenter;
-	Mix_Chunk *soundany;
+	QSound *soundenter;
+	QSound *soundany;
 
 protected:
 	void closeEvent(QCloseEvent *event);

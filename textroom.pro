@@ -1,7 +1,7 @@
 TEMPLATE = app
 TARGET = textroom
 DEPENDPATH += . resource src ui
-INCLUDEPATH += . src /usr/include/SDL
+INCLUDEPATH += . src
 DESTDIR += bin
 OBJECTS_DIR += build
 MOC_DIR += build
@@ -21,7 +21,7 @@ SOURCES += src/helpdialog.cpp \
  src/font.cpp
 RESOURCES += resource/textroom.qrc
 CONFIG += release
-RC_FILE = textroom.rc
+
 INSTALLS += data \
  target \
  documentation \
@@ -51,4 +51,4 @@ gnomemime.path = ~/.gnome/mime-info
 gnomemime.files = resource/desktop/textroom.mime
 gnomekeys.path = ~/.gnome/mime-info
 gnomekeys.files = resource/desktop/textroom.keys
-LIBS = -lSDL -lSDLmain -lSDL_mixer
+LIBS =

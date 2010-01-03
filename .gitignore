@@ -1,4 +1,11 @@
-bin/
-build/
+/bin/
+/build/
 *~
 Makefile
+*.vcproj
+*.ncb
+*.sln
+*.suo
+*.user
+*.idb
+*.pdb

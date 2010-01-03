@@ -33,9 +33,6 @@
 #include "helpdialog.h"
 #include "searchdialog.h"
 #include "font.h"
-#include "SDL/SDL.h"
-// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:  #include "SDL_mixer/SDL_mixer.h"
-#include "SDL/SDL_mixer.h"
 	
 TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 		: QWidget(parent, f), sentenceTally(0)
@@ -51,36 +48,18 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	alarm = 0;
 	parasold = 0;
 
+#ifdef Q_OS_WIN32
+	soundany = new QSound("sounds/keyany.wav");
+	soundenter = new QSound("sounds/keyenter.wav");
+#else
+	soundany = new QSound("/usr/local/share/textroom/keyany.wav");
+	soundenter = new QSound("/usr/local/share/textroom/keyenter.wav");
+#endif
+
 	optionsDialog = new OptionsDialog(this);
 	helpDialog = new HelpDialog(this);
 	selectFont = new SelectFont(this);
 	
-	int audio_rate = 44100;
-	Uint16 audio_format = AUDIO_S16SYS;
-	int audio_channels = 2;
-	int audio_buffers = 1024;
-	
-	if ( SDL_Init(SDL_INIT_AUDIO) < 0 ) {
-	fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
-	exit(1);
-	}
-	atexit(SDL_Quit);
-	
-	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) {
-	printf("Unable to initialize audio: %s\n", Mix_GetError());
-	exit(1);
-	}
-
-	soundenter = Mix_LoadWAV("/usr/local/share/keyenter.wav");
-	if(soundenter == NULL) {
-		printf("Unable to load WAV file: %s\n", Mix_GetError());
-	}
-
-	soundany = Mix_LoadWAV("/usr/local/share/keyany.wav");
-	if(soundany == NULL) {
-		printf("Unable to load WAV file: %s\n", Mix_GetError());
-	}
-		
 	new QShortcut ( QKeySequence(QKeySequence::New), this, SLOT( newFile() ) );
 	new QShortcut ( QKeySequence(QKeySequence::Open), this, SLOT( open() ) );
 	new QShortcut ( QKeySequence(QKeySequence::Save), this, SLOT( save() ) );
@@ -93,8 +72,8 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	new QShortcut ( QKeySequence(tr("Ctrl+Q", "Quit Application")) , this, SLOT( close() ) );
 	new QShortcut ( QKeySequence(tr("Alt+F4", "Quit Application")) , this, SLOT( close() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+F", "Find Text")) , this, SLOT( find() ) );
-	new QShortcut ( QKeySequence(tr("F11", "Toggle Fullscreen")) , this, SLOT( togleFullScreen() ) );
-	new QShortcut ( QKeySequence(tr("Esc", "Toggle Fullscreen")) , this, SLOT( togleEscape() ) );
+	new QShortcut ( QKeySequence(tr("F11", "Toggle Fullscreen")) , this, SLOT( toggleFullScreen() ) );
+	new QShortcut ( QKeySequence(tr("Esc", "Toggle Fullscreen")) , this, SLOT( toggleEscape() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+M", "Minimize TextRoom")) , this, SLOT( showMinimized() ) );
 	new QShortcut ( QKeySequence(tr("F3", "Find Next")) , this, SLOT( find_next() ) );
 	new QShortcut ( QKeySequence(tr("Shift+F3", "Find Previous")) , this, SLOT( find_previous() ) );
@@ -111,10 +90,8 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 #ifdef Q_OS_WIN32
 	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
-
 	QSettings settings;
 #endif	
-
 
 	fw = new QFileSystemWatcher(this);
 	fw->addPath( settings.fileName() );
@@ -162,24 +139,14 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	timer->start(1000);
 }
 
-void TextRoom::playSound(Mix_Chunk *sound)
-{
-	if(isSound)
-	{
-	channel = Mix_PlayChannel(-1, sound, 0);
-	if(channel == -1) {
-	printf("Unable to play WAV file: %s\n", Mix_GetError()); }
-	}
-}
-
-void TextRoom::togleEscape()
+void TextRoom::toggleEscape()
 {
 	if (helpDialog->isVisible())
 	{
 	helpDialog->hide();
 	}
 	else if ( isFullScreen() )
-		togleFullScreen();
+		toggleFullScreen();
 	else
 		close();
 
@@ -207,7 +174,7 @@ void TextRoom::insertTime()
 	textEdit->insertPlainText(clock);
 }
 
-void TextRoom::togleFullScreen()
+void TextRoom::toggleFullScreen()
 {
 
 	if ( !isFullScreen() )
@@ -805,10 +772,17 @@ void TextRoom::documentWasModified()
 
 	prevLength=textEdit->document()->toPlainText().size();
 
-	if (parasnew > parasold)
-	{ playSound(soundenter); }
-	else
-	{ playSound(soundany);}
+	if (isSound)
+	{
+		if (parasnew > parasold)
+		{
+			soundenter->play();
+		}
+		else
+		{ 
+			soundany->play();
+		}
+	}
 
 	parasold = parasnew;
 
@@ -837,7 +811,7 @@ void TextRoom::readSettings()
 	QFile file( settings.fileName() );
 	if ( !file.exists() )
 	{
-		togleFullScreen();
+		toggleFullScreen();
 		writeSettings();
 		return;
 	}
