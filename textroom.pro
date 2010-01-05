@@ -51,4 +51,4 @@ gnomemime.path = ~/.gnome/mime-info
 gnomemime.files = resource/desktop/textroom.mime
 gnomekeys.path = ~/.gnome/mime-info
 gnomekeys.files = resource/desktop/textroom.keys
-LIBS =
+LIBS += -lSDL_mixer -lSDL -lSDLmain

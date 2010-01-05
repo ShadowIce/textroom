@@ -28,18 +28,22 @@
 ****************************************************************************/
 
 #include <QtGui> 
+#include <SDL/SDL.h>
+#include <SDL/SDL_mixer.h>
 #include "textroom.h"
 #include "optionsdialog.h"
 #include "helpdialog.h"
 #include "searchdialog.h"
 #include "font.h"
+
 	
 TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
-		: QWidget(parent, f), sentenceTally(0)
+		: QWidget(parent, f), sentenceTally(0),
+		sdlInitialized(false), sdlFailed(false)
 {
 	setupUi(this);
 	setObjectName("textroom");
-	
+
 	readSettings();
 
 	numChanges = 0;
@@ -47,14 +51,6 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	wordcount = 0;
 	alarm = 0;
 	parasold = 0;
-
-#ifdef Q_OS_WIN32
-	soundany = new QSound("sounds/keyany.wav");
-	soundenter = new QSound("sounds/keyenter.wav");
-#else
-	soundany = new QSound("/usr/local/share/textroom/keyany.wav");
-	soundenter = new QSound("/usr/local/share/textroom/keyenter.wav");
-#endif
 
 	optionsDialog = new OptionsDialog(this);
 	helpDialog = new HelpDialog(this);
@@ -112,16 +108,12 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	const QStringList args = QCoreApplication::arguments();
 	if (args.count() == 2)
 	{
-		QFile file( args.at(1) );
-			if ( file.exists() )
-				curFile = args.at(1);
+		QFile file(args.at(1));
+			if (file.exists()) curFile = args.at(1);
 	}
 	
-	if (!curFile.isEmpty())
-		loadFile(curFile);
-	else
-		newFile();
-
+	if (!curFile.isEmpty()) loadFile(curFile);
+	else newFile();
 
 	// set cursor position
 	if ( isSaveCursor )
@@ -139,17 +131,16 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	timer->start(1000);
 }
 
+TextRoom::~TextRoom() {
+	if (sdlInitialized) destroySDLMixer();
+}
+
+
 void TextRoom::toggleEscape()
 {
-	if (helpDialog->isVisible())
-	{
-	helpDialog->hide();
-	}
-	else if ( isFullScreen() )
-		toggleFullScreen();
-	else
-		close();
-
+	if (helpDialog->isVisible()) helpDialog->hide();
+	else if (isFullScreen()) toggleFullScreen();
+	else close();
 }
 
 void TextRoom::insertDate()
@@ -176,11 +167,8 @@ void TextRoom::insertTime()
 
 void TextRoom::toggleFullScreen()
 {
-
-	if ( !isFullScreen() )
-		showFullScreen();
-	else
-		showNormal();
+	if (!isFullScreen()) showFullScreen();
+	else showNormal();
 //	sCursor();
 }
 
@@ -772,15 +760,23 @@ void TextRoom::documentWasModified()
 
 	prevLength=textEdit->document()->toPlainText().size();
 
-	if (isSound)
+	if (isSound && sdlInitialized)
 	{
 		if (parasnew > parasold)
 		{
-			soundenter->play();
+			if (Mix_PlayChannel(-1, soundenter, 0) == -1)
+			{
+				printf("Mix_PlayChannel: %s\n",Mix_GetError());
+    
+			}
 		}
 		else
 		{ 
-			soundany->play();
+			if (Mix_PlayChannel(-1, soundany, 0) == -1)
+			{
+				printf("Mix_PlayChannel: %s\n",Mix_GetError());
+    
+			}
 		}
 	}
 
@@ -900,13 +896,15 @@ void TextRoom::readSettings()
 	
 	textEdit->setMaximumWidth(editorWidth);
 
-
 	if ( (optOpenLastFile = settings.value("RecentFiles/OpenLastFile", true).toBool()) )
 	{
 		curFile = settings.value("RecentFiles/LastFile", curFile).toString();
 		if ( (isSaveCursor = settings.value("RecentFiles/SavePosition", true).toBool() ))
 			cPosition = settings.value("RecentFiles/AtPosition", cPosition).toInt();
 	}
+
+	if (isSound && !sdlInitialized)	initSDLMixer();
+	else if (!isSound && sdlInitialized) destroySDLMixer();
 }
 
 void TextRoom::writeSettings()
@@ -944,8 +942,7 @@ void TextRoom::writeSettings()
 	if ( optOpenLastFile )
 	{
 		settings.setValue("RecentFiles/SavePosition", isSaveCursor);
-		if ( isSaveCursor )
-			settings.setValue("RecentFiles/AtPosition", cPosition);
+		if (isSaveCursor) settings.setValue("RecentFiles/AtPosition", cPosition);
 	}
 
 	settings.setValue("README","Please read the help file"
@@ -966,15 +963,15 @@ void TextRoom::help()
 {
 	if (!helpDialog->isVisible())
 	{
-	int x = (width()/2)-351;
-	int y = (height()/2)-150;
-	helpDialog->move(x,y);
-	helpDialog->setWindowFlags(Qt::FramelessWindowHint);
-	helpDialog->showNormal();
+		int x = (width()/2)-351;
+		int y = (height()/2)-150;
+		helpDialog->move(x,y);
+		helpDialog->setWindowFlags(Qt::FramelessWindowHint);
+		helpDialog->showNormal();
 	}
 	else
 	{
-	helpDialog->hide();
+		helpDialog->hide();
 	}
 }
 
@@ -1003,9 +1000,6 @@ void TextRoom::loadStyleSheet(const QString &fcolor, const QString &bcolor, cons
 	label->setAutoFillBackground(true);
 	statsLabel->setAutoFillBackground(true);
 	deadlineLabel->setAutoFillBackground(true);
-
-	
-
 }
 
 void TextRoom::find()
@@ -1147,4 +1141,69 @@ void TextRoom::vPositionChanged()
 void TextRoom::hSliderPositionChanged()
 {
 	textEdit->verticalScrollBar()->setValue( horizontalSlider->value() );
+}
+
+void TextRoom::initSDLMixer() {
+	int audio_rate = 44100;
+	Uint16 audio_format = AUDIO_S16SYS;
+	int audio_channels = 2;
+	int audio_buffers = 1024;
+
+	if (sdlInitialized || sdlFailed)
+	{
+		return;
+	}
+	
+	// assume the worst, method will return on error or set this to false at the end
+	sdlFailed = true;
+	
+	if (SDL_Init(SDL_INIT_AUDIO) != 0)
+	{
+		QMessageBox::warning(this, qApp->applicationName(),
+			tr("Unable to initialize SDL:") + QString(SDL_GetError()), QMessageBox::Ok);
+		return;
+	}
+
+	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0)
+	{
+		QMessageBox::warning(this, qApp->applicationName(),
+			tr("Unable to initialize audio:") + QString(Mix_GetError()), QMessageBox::Ok);
+		SDL_QuitSubSystem(SDL_INIT_AUDIO);
+		return;
+	}
+
+#ifdef Q_OS_WIN32
+	soundany = Mix_LoadWAV("sounds/keyany.wav");
+#else
+	soundany = Mix_LoadWAV("/usr/local/share/textroom/keyany.wav");
+#endif
+	if(soundany == NULL)
+	{
+		QMessageBox::warning(this, qApp->applicationName(),
+			tr("Could not load WAV file:") + QString(Mix_GetError()), QMessageBox::Ok);
+		destroySDLMixer();
+		return;
+	}
+
+#ifdef Q_OS_WIN32
+	soundenter = Mix_LoadWAV("sounds/keyenter.wav");
+#else
+	soundenter = Mix_LoadWAV("/usr/local/share/textroom/keyenter.wav");
+#endif
+	if(soundenter == NULL)
+	{
+		QMessageBox::warning(this, qApp->applicationName(),
+			tr("Could not load WAV file:") + QString(Mix_GetError()), QMessageBox::Ok);
+		destroySDLMixer();
+		return;
+	}
+
+	sdlFailed = false;
+	sdlInitialized = true;
+}
+
+void TextRoom::destroySDLMixer() {
+	Mix_CloseAudio();
+	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	sdlInitialized = false;
 }

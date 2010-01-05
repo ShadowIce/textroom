@@ -31,7 +31,8 @@
 #define TEXTROOM_H
 
 #include <QtGui>
- 
+#include <SDL/SDL_mixer.h>
+
 #include "ui_textroom.h"
 
 class QShortcut;
@@ -47,6 +48,7 @@ class TextRoom : public QWidget, public Ui::TextRoomMain
  
 public:
 	TextRoom(QWidget *parent = 0, Qt::WFlags f = 0 );
+	~TextRoom();
 
 private slots:
 
@@ -89,6 +91,8 @@ private:
 	void loadFile(const QString &fileName);
 	void setCurrentFile(const QString &fileName);
 	void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
+	void initSDLMixer();
+	void destroySDLMixer();
 
 	HelpDialog *helpDialog;
 	OptionsDialog *optionsDialog;
@@ -141,8 +145,10 @@ private:
 	const char *filename1_char;
 	const char *filename2_char;
 	int channel;
-	QSound *soundenter;
-	QSound *soundany;
+	bool sdlInitialized;
+	bool sdlFailed;
+	Mix_Chunk *soundenter;
+	Mix_Chunk *soundany;
 
 protected:
 	void closeEvent(QCloseEvent *event);
