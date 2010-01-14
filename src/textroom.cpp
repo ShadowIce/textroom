@@ -319,10 +319,9 @@ void TextRoom::loadFile(const QString &fileName)
 	QApplication::restoreOverrideCursor();
 
 	setCurrentFile(fileName);
-	if (fileName.endsWith("txt"))
-	{
-		textEdit->setFont(defaultFont);
-	}
+
+	changeDefaultFont();
+
 	QString text = textEdit->document()->toPlainText();
 	parasold = text.count("\n", Qt::CaseSensitive);
 	vPositionChanged();
@@ -903,6 +902,8 @@ void TextRoom::readSettings()
 			cPosition = settings.value("RecentFiles/AtPosition", cPosition).toInt();
 	}
 
+	changeDefaultFont();
+
 	if (isSound && !sdlInitialized)	initSDLMixer();
 	else if (!isSound && sdlInitialized) destroySDLMixer();
 }
@@ -1113,6 +1114,16 @@ void TextRoom::textSizeDown()
 	mergeFormatOnWordOrSelection(fmt);
 }
 
+void TextRoom::changeDefaultFont()
+{
+//	if (curFile.endsWith("txt"))
+//	{
+
+	textEdit->setFont(defaultFont);
+
+//	}
+}
+
 void TextRoom::changeFont()
 {
 	QString currentFont = textEdit->textCursor().charFormat().fontFamily();
@@ -1151,6 +1162,7 @@ void TextRoom::initSDLMixer() {
 
 	if (sdlInitialized || sdlFailed)
 	{
+		// don't initialize again if it failed once or is still initialized
 		return;
 	}
 	

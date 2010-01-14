@@ -81,6 +81,7 @@ private slots:
 	void changeFont();
 	void vPositionChanged();
 	void hSliderPositionChanged();
+	void changeDefaultFont();
 	 
 private:
 	bool maybeSave();
