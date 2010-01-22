@@ -151,6 +151,7 @@ private:
 	bool sdlFailed;
 	Mix_Chunk *soundenter;
 	Mix_Chunk *soundany;
+	bool wordCountChanged;
 
 protected:
 	void closeEvent(QCloseEvent *event);

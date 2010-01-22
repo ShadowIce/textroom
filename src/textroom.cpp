@@ -704,6 +704,7 @@ void TextRoom::getFileStatus()
 	QString clock = now.toString("hh:mm");
 
 	//Compute words
+	if (!wordCountChanged) return;
 	const int words = getWordCount();
 	if (isPageCount)
 	{
@@ -729,6 +730,7 @@ void TextRoom::getFileStatus()
 	}
 	deadlineLabel->setText(showdeadline + remain + clock);
 	statsLabel->setText(tr("%1").arg(words) + target);
+	wordCountChanged = false;
 }
 
 unsigned long TextRoom::getWordCount()
@@ -803,6 +805,8 @@ void TextRoom::documentWasModified()
 	parasold = parasnew;
 
 	vPositionChanged();
+
+	wordCountChanged = true;
 
 	//getFileStatus();
 }
