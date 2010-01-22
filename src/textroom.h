@@ -94,6 +94,7 @@ private:
 	void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
 	void initSDLMixer();
 	void destroySDLMixer();
+	unsigned long getWordCount();
 
 	HelpDialog *helpDialog;
 	OptionsDialog *optionsDialog;
