@@ -903,7 +903,8 @@ void TextRoom::readSettings()
 	alarm = settings.value("TimedWriting", 0).toInt();
 	pageCountFormula = settings.value("PageCountFormula", 250).toInt();
 	dateFormat = settings.value("DateFormat", "dd MMMM yyyy dddd").toString();
-	timeFormat = settings.value("TimeFormat", "HH:MM").toString();
+	timeFormat = settings.value("TimeFormat", "hh:mm").toString();
+	if (timeFormat == "HH:MM") timeFormat = "hh:mm"; // fix for old format
 
 	horizontalSlider->setVisible( settings.value("ScrollBar", true).toBool() );
 	isScrollBarVisible = horizontalSlider->isVisible();

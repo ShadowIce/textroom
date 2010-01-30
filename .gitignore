@@ -9,3 +9,4 @@ Makefile
 *.user
 *.idb
 *.pdb
+.emacs.desktop*
