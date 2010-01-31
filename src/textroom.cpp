@@ -131,7 +131,8 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	timer->start(1000);
 }
 
-TextRoom::~TextRoom() {
+TextRoom::~TextRoom()
+{
 	if (sdlInitialized) destroySDLMixer();
 }
 
@@ -174,7 +175,6 @@ void TextRoom::toggleFullScreen()
 
 void TextRoom::closeEvent(QCloseEvent *event)
 {
-//	qDebug() << "closing";
 	if (maybeSave())
 	{
 		fw->disconnect();
@@ -325,8 +325,8 @@ void TextRoom::loadFile(const QString &fileName)
 	QString text = textEdit->document()->toPlainText();
 	parasold = text.count("\n", Qt::CaseSensitive);
 	vPositionChanged();
+	wordCountChanged = true;
 	getFileStatus();
-
 }
 
 bool TextRoom::maybeSave()
@@ -771,12 +771,14 @@ void TextRoom::documentWasModified()
 	QString text = textEdit->document()->toPlainText();
 	parasnew = text.count("\n", Qt::CaseSensitive);
 
-	if (isAutoSave && numChanges++ > 200) {
+	if (isAutoSave && numChanges++ > 200)
+	{
 		numChanges = 0;	
 		autoSave();
 	} 
 
-	if ( isFlowMode && textEdit->document()->toPlainText().size() < prevLength ) {
+	if ( isFlowMode && textEdit->document()->toPlainText().size() < prevLength )
+	{
 		textEdit->undo();
 	} 
 
@@ -803,12 +805,28 @@ void TextRoom::documentWasModified()
 	}
 
 	parasold = parasnew;
-
 	vPositionChanged();
-
 	wordCountChanged = true;
+	updateLabel();
 
 	//getFileStatus();
+}
+
+void TextRoom::updateLabel()
+{
+	QString shownName;
+	if (curFile.isEmpty())
+	{
+		shownName = "Untitled.txr";
+   	}
+	else
+	{
+		shownName = strippedName(curFile);
+   	}
+
+	if (isWindowModified()) shownName.append("*");
+
+	label->setText(shownName);
 }
 
 void TextRoom::alarmTime()
@@ -904,7 +922,12 @@ void TextRoom::readSettings()
 	pageCountFormula = settings.value("PageCountFormula", 250).toInt();
 	dateFormat = settings.value("DateFormat", "dd MMMM yyyy dddd").toString();
 	timeFormat = settings.value("TimeFormat", "hh:mm").toString();
-	if (timeFormat == "HH:MM") timeFormat = "hh:mm"; // fix for old format
+	if (timeFormat == "HH:MM") 
+	{
+		// fix for old format
+		timeFormat = "hh:mm";
+		settings.setValue("TimeFormat", timeFormat);
+	}
 
 	horizontalSlider->setVisible( settings.value("ScrollBar", true).toBool() );
 	isScrollBarVisible = horizontalSlider->isVisible();
@@ -932,6 +955,9 @@ void TextRoom::readSettings()
 
 	if (isSound && !sdlInitialized)	initSDLMixer();
 	else if (!isSound && sdlInitialized) destroySDLMixer();
+
+	wordCountChanged = true;
+	getFileStatus();
 }
 
 void TextRoom::writeSettings()
@@ -1180,7 +1206,8 @@ void TextRoom::hSliderPositionChanged()
 	textEdit->verticalScrollBar()->setValue( horizontalSlider->value() );
 }
 
-void TextRoom::initSDLMixer() {
+void TextRoom::initSDLMixer()
+{
 	int audio_rate = 44100;
 	Uint16 audio_format = AUDIO_S16SYS;
 	int audio_channels = 2;
@@ -1240,7 +1267,8 @@ void TextRoom::initSDLMixer() {
 	sdlInitialized = true;
 }
 
-void TextRoom::destroySDLMixer() {
+void TextRoom::destroySDLMixer()
+{
 	Mix_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	sdlInitialized = false;

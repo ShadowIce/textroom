@@ -95,6 +95,7 @@ private:
 	void initSDLMixer();
 	void destroySDLMixer();
 	unsigned long getWordCount();
+	void updateLabel();
 
 	HelpDialog *helpDialog;
 	OptionsDialog *optionsDialog;
