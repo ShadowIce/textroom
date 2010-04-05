@@ -109,7 +109,6 @@ private:
 	QString deadlinetext;
 	QDate deadline;
 	QDate today;
-	QString editDate;
 	QString dateFormat;
 	QString timeFormat;
 	int wordcount;

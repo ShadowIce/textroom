@@ -415,295 +415,58 @@ QString TextRoom::strippedName(const QString &fullFileName)
 
 void TextRoom::getFileStatus()
 {
-	//Deadline
-	QString showdeadline;
-	QString targetdate = deadline.toString("yyyyMMdd");
-	QString targetday = deadline.toString("dd");
-	QString targetmonth = deadline.toString("MM");
-	QString targetyear = deadline.toString("yyyy");
+	// Deadline
+	QString deadlinetext;
+	QDate today = QDate::currentDate();
+	int daystotal = today.daysTo(deadline);
+	if (daystotal > 0)
+	{
+		int daysleft = 0, monthsleft = 0, yearsleft = 0;
+		// count years, months and days
+		while (daystotal > 0)
+		{
+			if (today.addYears(yearsleft + 1).addMonths(monthsleft) <= deadline)
+			{
+				yearsleft++;
+			}
+			else if (today.addYears(yearsleft).addMonths(monthsleft + 1) <= deadline)
+			{
+				monthsleft++;
+			}
+			else
+			{
+				daysleft = today.addYears(yearsleft).addMonths(monthsleft).daysTo(deadline);
+			}
+			daystotal = today.addYears(yearsleft).addMonths(monthsleft).daysTo(deadline) - daysleft;
+		}
+
+		if (yearsleft > 0)
+		{
+			deadlinetext = tr("%1 Year(s)").arg(yearsleft);
+		}
+		if (monthsleft > 0)
+		{
+			if (deadlinetext != "") deadlinetext += ", ";
+			deadlinetext += tr("%1 Month(s)").arg(monthsleft);
+		}
+		if (daysleft > 0)
+		{
+			if (deadlinetext != "") deadlinetext += ", ";
+			deadlinetext += tr("%1 Day(s)").arg(daysleft);
+		}
+
+		deadlinetext += tr(" to deadline. ");
+	}
+
+	QString clock = QDateTime::currentDateTime().toString("hh:mm");
+	deadlineLabel->setText(deadlinetext + clock);
+
+	//Compute words
 	QString target;
-	int targetdayint = targetday.toInt();
-	int targetmonthint = targetmonth.toInt();
-	int targetyearint = targetyear.toInt();
-	today = QDate::currentDate();
-	QString daytoday = today.toString("dd");
-	QString thismonth = today.toString("MM");
-	QString thisyear = today.toString("yyyy");
-	int daytodayint = daytoday.toInt();
-	int thismonthint = thismonth.toInt(); 
-	int thisyearint = thisyear.toInt();
-	int daysremaining = (targetdayint-daytodayint);
-	int monthsremaining = targetmonthint-thismonthint;
-	int yearsremaining = targetyearint-thisyearint;
-	QString daysto;
-	daysto.setNum(daysremaining);
-	QString monthsto;
-	monthsto.setNum(monthsremaining);
-	QString yearsto;
-	yearsto.setNum(yearsremaining);
-	if (yearsremaining < 0)
-	{
-		showdeadline = "";
-		editDate = thisyear+thismonth+daytoday;
-	}
-	else if (yearsremaining == 0 && monthsremaining <0)
-	{
-		showdeadline="";
-		editDate = thisyear+thismonth+daytoday;
-	}
-	else if (yearsremaining == 0 && monthsremaining==0)
-	{
-		if (daysremaining<=0)
-		{
-			showdeadline="";
-			editDate = thisyear+thismonth+daytoday;
-		}
-		if (daysremaining>0)
-		{
-			showdeadline = daysto + " Day(s) ";
-			editDate = targetdate;
-		}
-	}
-	else if (yearsremaining == 0 && monthsremaining > 0)
-	{
-		editDate = targetdate;
-		if (daysremaining == 0)
-		{
-			showdeadline = monthsto + " Month(s) ";
-		}
-		if (daysremaining > 0)
-		{
-			showdeadline = monthsto + " Month(s), " + daysto + " Day(s) ";
-		}
-		if (daysremaining < 0)
-		{
-			QString monthstominusone;
-			monthstominusone.setNum(monthsremaining-1);
-			QString ismonths;
-			if (monthsremaining-1 == 0)
-			{
-				ismonths = "";
-			}
-			if (monthsremaining-1 > 0)
-			{
-				ismonths = monthstominusone + " Month(s), ";
-			}
-			if (thismonthint == 1 || thismonthint == 3 || thismonthint == 5 || thismonthint == 7 || thismonthint == 8 || thismonthint == 10 ||thismonthint == 12)
-			{
-				QString daystoplusthirtyone;
-				daystoplusthirtyone.setNum(daysremaining+31);
-				showdeadline = ismonths + daystoplusthirtyone + " Day(s) ";
-			}
-			if (thismonthint == 2)
-			{
-				int daystoplusonefebruary;
-				daystoplusonefebruary = daysremaining + 28;
-				if (yearsremaining%4==0)
-				{
-					daystoplusonefebruary = daystoplusonefebruary + 1;
-				}
-				QString daysforfebruary;
-				daysforfebruary.setNum(daystoplusonefebruary);
-				showdeadline = ismonths + daysforfebruary + " Day(s) ";
-			}
-			if (thismonthint == 4 || thismonthint == 6 || thismonthint == 9 || thismonthint == 11)
-			{
-				int daystoplusthirty;
-				daystoplusthirty = daysremaining + 30;
-				QString daysforothers;
-				daysforothers.setNum(daystoplusthirty);
-				showdeadline = ismonths + daysforothers + " Day(s) ";
-			}
-		}
-	}
-	else if (yearsremaining > 0 && monthsremaining > 0)
-	{
-		editDate = targetdate;
-		if (daysremaining == 0)
-		{
-			showdeadline= monthsto + " Month(s)  ";			
-		}
-		if (daysremaining > 0)
-		{
-			showdeadline = monthsto + " Month(s), " + daysto + " Day(s) ";			
-		}
-		if (daysremaining<0)
-		{
-			QString isyears;
-			if (yearsremaining == 0)
-			{
-				isyears = "";
-			}
-			else
-				isyears = yearsto + " Year(s), ";
-			QString monthstominusone;
-			monthstominusone.setNum(monthsremaining-1);
-			QString ismonths;
-			if (monthsremaining-1 == 0)
-			{
-				ismonths = "";			
-			}
-			else
-			{
-				ismonths = monthstominusone + " Month(s), ";
-			}
-			if (thismonthint == 1 || thismonthint == 3 || thismonthint == 5 || thismonthint == 7 || thismonthint == 8 || thismonthint == 10 ||thismonthint == 12)
-			{
-				QString daystoplusthirtyone;
-				daystoplusthirtyone.setNum(daysremaining+31);
-				showdeadline = isyears + ismonths + daystoplusthirtyone + " Day(s) ";
-			}
-			if (thismonthint == 2)
-			{
-				int daystoplusonefebruary;
-				daystoplusonefebruary = daysremaining + 28;
-				if (yearsremaining%4==0)
-				{
-					daystoplusonefebruary = daystoplusonefebruary + 1;
-				}
-				QString daysforfebruary;
-				daysforfebruary.setNum(daystoplusonefebruary);
-				showdeadline = isyears + ismonths + daysforfebruary + " Day(s) ";
-			}
-			if (thismonthint == 4 || thismonthint == 6 || thismonthint == 9 || thismonthint == 11)
-			{
-				int daystoplusthirty;
-				daystoplusthirty = daysremaining + 30;
-				QString daysforothers;
-				daysforothers.setNum(daystoplusthirty);
-				showdeadline = isyears  + ismonths + daysforothers + " Day(s) ";
-			}
-		}
-	}
-	else if (yearsremaining > 0 && monthsremaining == 0)
-	{
-		editDate = targetdate;
-		if (daysremaining == 0)
-		{
-			showdeadline = yearsto + " Year(s) ";
-		}
-		if (daysremaining > 0)
-		{
-			showdeadline = yearsto + " Year(s), " + daysto + " Day(s) "; 
-		}
-		if (daysremaining < 0)
-		{
-			QString isyears;
-			isyears.setNum(yearsremaining-1);
-			QString monthstopluseleven;
-			monthstopluseleven.setNum(monthsremaining+11);
-			if (yearsremaining-1 == 0)
-			{
-				isyears="";
-			}
-			QString ismonths = monthstopluseleven + " Month(s), ";
-			if (thismonthint == 1 || thismonthint == 3 || thismonthint == 5 || thismonthint == 7 || thismonthint == 8 || thismonthint == 10 ||thismonthint == 12)
-			{
-				
-				QString daystoplusthirtyone;
-				daystoplusthirtyone.setNum(daysremaining+31);
-				showdeadline = isyears + ismonths + daystoplusthirtyone + " Day(s) ";
-			}
-			if (thismonthint == 2)
-			{
-				int daystoplusonefebruary;
-				daystoplusonefebruary = daysremaining + 28;
-				if (thisyearint%4==0)
-				{
-					daystoplusonefebruary = daystoplusonefebruary + 1;
-				}
-				QString daysforfebruary;
-				daysforfebruary.setNum(daystoplusonefebruary);
-				showdeadline = isyears + ismonths + daysforfebruary + " Day(s) ";
-			}
-			if (thismonthint == 4 || thismonthint == 6 || thismonthint == 9 || thismonthint == 11)
-			{
-				int daystoplusthirty;
-				daystoplusthirty = daysremaining + 30;
-				QString daysforothers;
-				daysforothers.setNum(daystoplusthirty);
-				showdeadline = isyears  + ismonths + daysforothers + " Day(s) ";
-			}
-		}
-	}
-	else if (yearsremaining > 0 && monthsremaining < 0)
-	{
-		editDate = targetdate;
-		QString yearstominusone;
-		yearstominusone.setNum(yearsremaining-1);
-		QString isyears = yearstominusone + " Year(s), ";
-		if (daysremaining==0)
-		{
-			QString monthstoplustwelve;
-			monthstoplustwelve.setNum(monthsremaining+12);
-			if (yearsremaining-1 == 0)
-			{
-				isyears="";
-			}
-			showdeadline= isyears + monthstoplustwelve + " Month(s) ";
-		}
-		if (daysremaining < 0)
-		{
-			QString monthstopluseleven;
-			monthstopluseleven.setNum(monthsremaining+11);
-			if (yearsremaining-1 == 0)
-			{
-				isyears="";
-			}
-			QString ismonths = monthstopluseleven + " Month(s), ";
-			if (thismonthint == 1 || thismonthint == 3 || thismonthint == 5 || thismonthint == 7 || thismonthint == 8 || thismonthint == 10 ||thismonthint == 12)
-			{
-				QString daystoplusthirtyone;
-				daystoplusthirtyone.setNum(daysremaining+31);
-				showdeadline = isyears + ismonths + daystoplusthirtyone + " Day(s) ";
-			}
-			if (thismonthint == 2)
-			{
-				int daystoplusonefebruary;
-				daystoplusonefebruary = daysremaining + 28;
-				if (thisyearint%4==0)
-				{
-					daystoplusonefebruary = daystoplusonefebruary + 1;
-				}
-				QString daysforfebruary;
-				daysforfebruary.setNum(daystoplusonefebruary);
-				showdeadline = isyears + ismonths + daysforfebruary + " Day(s) ";
-			}
-			if (thismonthint == 4 || thismonthint == 6 || thismonthint == 9 || thismonthint == 11)
-			{
-				int daystoplusthirty;
-				daystoplusthirty = daysremaining + 30;
-				QString daysforothers;
-				daysforothers.setNum(daystoplusthirty);
-				showdeadline = isyears  + ismonths + daysforothers + " Day(s) ";
-			}
-		}
-		if (daysremaining > 0)
-		{
-			int yearstominusone = yearsremaining - 1;
-			QString monthstoplustwelve;
-			monthstoplustwelve.setNum(monthsremaining+12);
-			if (yearstominusone == 0)
-			{
-				showdeadline = monthstoplustwelve + " Month(s), " + daysto + " Day(s) ";
-			}
-			if (yearstominusone > 0)
-			{
-				showdeadline = yearstominusone + " Year(s), " + monthstoplustwelve + " Month(s), " + daysto +" Day(s) ";
-			}
-		}
-	}
-	QString remain;
-	if (showdeadline == "") remain = "";
-	else remain = "to deadline. ";
 	int percent;
 	QString percenttext;
 	QString statsLabelStr;
 	QString statsLabelToolTip;
-	QDateTime now = QDateTime::currentDateTime();
-	QString clock = now.toString("hh:mm");
-
-	//Compute words
 	if (!wordCountChanged) return;
 	const int words = getWordCount();
 	if (isPageCount)
@@ -711,7 +474,7 @@ void TextRoom::getFileStatus()
 		float pageC = ((words/pageCountFormula)+1);
 		pageCount = (int)pageC;
 		pageCountText = pageCountText.setNum(pageCount);
-		pageText = pageCountText + " pages   ";
+		pageText = pageCountText + tr(" pages   ");
 	}
 	else
 	{
@@ -719,17 +482,16 @@ void TextRoom::getFileStatus()
 	}
 	if (wordcount == 0)
 	{
-			target = " words.   " + pageText;
+			target = tr(" words.   ") + pageText;
 	}
 	else if (words < wordcount || words > wordcount)
 	{
 		float f = words*100/wordcount;
 		percent = (int)f;
 		percenttext = percenttext.setNum(percent);
-		target = " of " + wordcounttext + " words  (%" + percenttext + ")   " + pageText;
+		target = tr(" of ") + wordcounttext + tr(" words  (%") + percenttext + ")   " + pageText;
 	}
-	deadlineLabel->setText(showdeadline + remain + clock);
-	statsLabel->setText(tr("%1").arg(words) + target);
+	statsLabel->setText(QString::number(words) + target);
 	wordCountChanged = false;
 }
 
@@ -980,7 +742,7 @@ void TextRoom::writeSettings()
 	settings.setValue("RecentFiles/LastFile", curFile);
 	settings.setValue("RecentFiles/LastDir", curDir);
 	settings.setValue("TextSearch/LastPhrase", lastSearch);
-	settings.setValue("Deadline", editDate);
+	settings.setValue("Deadline", deadline.toString("yyyyMMdd"));
 	settings.setValue("TimedWriting", alarm);
 
 	int maxEditorWidth = width();
