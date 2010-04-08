@@ -38,13 +38,11 @@ int main(int argc, char ** argv)
 {
 	QApplication app(argc, argv);
 	app.setQuitOnLastWindowClosed(true);
-	app.setOrganizationName("textroom");
-	app.setOrganizationDomain("petartoushkov.hit.bg");
 	app.setApplicationName("TextRoom");
 	
 	// show splashscreen
 #ifdef Q_OS_WIN32
-	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+	QSettings settings(QDir::homePath()+QObject::tr("/Application Data/")+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
 
 	QSettings settings;
@@ -57,16 +55,13 @@ int main(int argc, char ** argv)
 		{
 			splash = new QSplashScreen(splashpix);
 			splash->show();
-			splash->showMessage("Loading... ", Qt::AlignBottom+Qt::AlignRight, QColor(128,128,128));
+			splash->showMessage(QObject::tr("Loading... "), Qt::AlignBottom+Qt::AlignRight, QColor(128,128,128));
 		}
 	}
-
-
 	
 	TextRoom *win = new TextRoom(NULL);
 	win->show();
 
-	
 	if (splash)
 	{
 		QTimer *timer = new QTimer(win);
@@ -75,5 +70,6 @@ int main(int argc, char ** argv)
 		timer->setSingleShot(true);
 		//splash->finish(win);
 	}
+
 	return app.exec();
 }

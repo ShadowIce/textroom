@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include <QtGui> 
+#include <QtGui>
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
 #include "textroom.h"
@@ -84,7 +84,7 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	new QShortcut ( QKeySequence(tr("Shift+F4", "Show Cursor")) , this, SLOT( sCursor() ) );
 
 #ifdef Q_OS_WIN32
-	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+	QSettings settings(QDir::homePath()+tr("/Application Data/")+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
 	QSettings settings;
 #endif	
@@ -199,17 +199,18 @@ void TextRoom::closeEvent(QCloseEvent *event)
  
 void TextRoom::about() 
 {
-	QMessageBox::about(this,"About TextRoom",
-				"TextRoom Editor ver. 0.2.5\n\n"
+	QMessageBox::about(this,tr("About TextRoom"),
+				tr("TextRoom Editor ver. 0.5.5\n\n"
 		"Project home page: http://code.google.com/p/textroom/\n\n"
 		"Code, help and insights (in alphabetical order) by:\n"
 		"Adamvert (from ubuntuforums.org),\n"
 		"Magnus Edvardsson (a.k.a. zebulon M),\n"
+		"Maurice Gilden,\n"
 		"Omer Bahri Gordebak,\n"
 		"Peter Toushkov\n\n"
 		"TextRoom is partially based on\n"
 		"The Phrasis project by Jacob R. Rideout:\n"
-		"http://code.google.com/p/phrasis/\n\n");
+		"http://code.google.com/p/phrasis/\n\n"));
 }
 
 void TextRoom::newFile()
@@ -264,7 +265,7 @@ bool TextRoom::save()
 
 bool TextRoom::saveAs()
 {
-	QString fileName = QFileDialog::getSaveFileName(this, "Save As", QDir::homePath() + "/*.txr", "TextRoom Documents (*.txr);;Html Files (*.htm *.html);;Text Documents (*.txt)");
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"), QDir::homePath() + "/*.txr", tr("TextRoom Documents (*.txr);;Html Files (*.htm *.html);;Text Documents (*.txt)"));
 	if (!fileName.isEmpty())
 	{
 		return saveFile(fileName);
@@ -462,36 +463,24 @@ void TextRoom::getFileStatus()
 	deadlineLabel->setText(deadlinetext + clock);
 
 	//Compute words
-	QString target;
-	int percent;
-	QString percenttext;
-	QString statsLabelStr;
-	QString statsLabelToolTip;
+	QString pageText, wordText;
 	if (!wordCountChanged) return;
 	const int words = getWordCount();
 	if (isPageCount)
 	{
-		float pageC = ((words/pageCountFormula)+1);
-		pageCount = (int)pageC;
-		pageCountText = pageCountText.setNum(pageCount);
-		pageText = pageCountText + tr(" pages   ");
-	}
-	else
-	{
-		pageText = "";
+		pageCount = (int)((words/pageCountFormula)+1);;
+		pageText = tr("%1 pages").arg(pageCount);
 	}
 	if (wordcount == 0)
 	{
-			target = tr(" words.   ") + pageText;
+		wordText = tr("%1 words.").arg(words);
 	}
-	else if (words < wordcount || words > wordcount)
+	else if (words != wordcount || words > wordcount)
 	{
-		float f = words*100/wordcount;
-		percent = (int)f;
-		percenttext = percenttext.setNum(percent);
-		target = tr(" of ") + wordcounttext + tr(" words  (%") + percenttext + ")   " + pageText;
+		int percent = (int)(words*100/wordcount);
+		wordText = tr("%1 of %2 words (%3%).").arg(words).arg(wordcount).arg(percent);
 	}
-	statsLabel->setText(QString::number(words) + target);
+	statsLabel->setText(wordText + "   " + pageText);
 	wordCountChanged = false;
 }
 
@@ -602,7 +591,7 @@ void TextRoom::alarmTime()
 void TextRoom::readSettings()
 {
 #ifdef Q_OS_WIN32
-	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+	QSettings settings(QDir::homePath()+tr("/Application Data/")+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
 
 	QSettings settings;
@@ -686,7 +675,7 @@ void TextRoom::readSettings()
 	timeFormat = settings.value("TimeFormat", "hh:mm").toString();
 	if (timeFormat == "HH:MM") 
 	{
-		// fix for old format
+		// auto-fix for old (wrong) format
 		timeFormat = "hh:mm";
 		settings.setValue("TimeFormat", timeFormat);
 	}
@@ -726,7 +715,7 @@ void TextRoom::writeSettings()
 {
 
 #ifdef Q_OS_WIN32
-	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+	QSettings settings(QDir::homePath()+tr("/Application Data/")+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
 
 	QSettings settings;
@@ -760,7 +749,7 @@ void TextRoom::writeSettings()
 		if (isSaveCursor) settings.setValue("RecentFiles/AtPosition", cPosition);
 	}
 
-	settings.setValue("README","Please read the help file"
+	settings.setValue("README", "Please read the help file"
 					  " by pressing F1, the help key, for"
 					  " instructions on how to modify this file.");
 }

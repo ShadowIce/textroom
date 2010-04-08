@@ -59,7 +59,7 @@ void OptionsDialog::startAlarm()
 void OptionsDialog::reaSettings()
 {
 #ifdef Q_OS_WIN32
-	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+	QSettings settings(QDir::homePath()+tr("/Application Data/")+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
 
 	QSettings settings;
@@ -139,7 +139,7 @@ void OptionsDialog::writSettings()
 {
 
 #ifdef Q_OS_WIN32
-	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+	QSettings settings(QDir::homePath()+tr("/Application Data/")+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
 
 	QSettings settings;

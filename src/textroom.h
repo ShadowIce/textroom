@@ -130,8 +130,6 @@ private:
 	int cPosition;
 	int textSize;
 	int pageCount;
-	QString pageCountText;
-	QString pageText;
 	int pageCountFormula;
 	bool ind;
 	bool isAutoSave;
