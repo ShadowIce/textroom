@@ -84,9 +84,6 @@
   <property name="autoFillBackground" >
    <bool>true</bool>
   </property>
-  <property name="locale" >
-   <locale country="UnitedStates" language="English" />
-  </property>
   <layout class="QVBoxLayout" >
    <property name="spacing" >
     <number>0</number>
@@ -228,9 +225,6 @@
        </property>
        <property name="styleSheet" >
         <string notr="true" />
-       </property>
-       <property name="locale" >
-        <locale country="UnitedStates" language="English" />
        </property>
        <property name="frameShape" >
         <enum>QFrame::NoFrame</enum>
@@ -398,9 +392,6 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="styleSheet" >
         <string notr="true" />
-       </property>
-       <property name="locale" >
-        <locale country="UnitedStates" language="English" />
        </property>
        <property name="frameShape" >
         <enum>QFrame::Panel</enum>
