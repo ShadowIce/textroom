@@ -41,6 +41,8 @@ int main(int argc, char ** argv)
 	app.setOrganizationName("textroom");
 	app.setOrganizationDomain("petartoushkov.hit.bg");
 	app.setApplicationName("TextRoom");
+
+       QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
 	
 	// show splashscreen
 #ifdef Q_OS_WIN32

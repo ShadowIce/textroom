@@ -1,14 +1,13 @@
+
 [Desktop Entry]
-Version=1.0
+Version=0.6.2
 Encoding=UTF-8
 Name=TextRoom
+GenericName=TextRoom
 Type=Application
+Exec=textroom
 Categories=Application;Office
 Terminal=false
 Icon=textroom
-Comment=Fullscreen text editor
-Exec=textroom
-GenericName=
-MimeType=text/textroom;
-Name[tr_TR]=textroom
-Name[en_US]=TextRoom
+Comment=Fullscreen text editor for writers
+MimeType=application/x-txr;

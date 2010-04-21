@@ -37,6 +37,8 @@ OptionsDialog::OptionsDialog(QWidget *parent)
 {
 	ui.setupUi(this);
 	reaSettings();
+        QPlastiqueStyle * style = new QPlastiqueStyle();
+        OptionsDialog::setStyle(style);
 
 	connect(ui.pushButton, SIGNAL( clicked() ), this, SLOT( startAlarm() ) );
 	connect(ui.browseButton, SIGNAL( clicked() ), this, SLOT( selectDir() ) );
@@ -78,19 +80,11 @@ void OptionsDialog::reaSettings()
 	QFont font;
 	QFont defaultFont;
 
-	fontS << settings.value("Font/FileName_Settings", ui.statusbarFontComboBox->currentFont() ).toString()
-		<< settings.value("Font/Statistics_Settings", ui.statusbarFontComboBox->currentFont() ).toString()
-		<< settings.value("Font/DefaultFont", ui.fontComboBox->currentFont() ).toString();
-	
-	font.fromString(fontS.at(0));
-	ui.statusbarFontComboBox->setCurrentFont( font );
-	ui.statusbarBoldCheckBox->setChecked( font.bold() );
-	ui.statusbarItalicCheckBox->setChecked( font.italic() );
-	ui.statusbarSpinBox->setValue( font.pointSize() );
-	
-	defaultFont.fromString(fontS.at(2));
-	ui.fontComboBox->setCurrentFont( defaultFont );
-	ui.fontSizeSpinBox->setValue( defaultFont.pointSize() );
+                 font.fromString( settings.value("StatusFont").toString() );
+                 defaultFont.fromString( settings.value("DefaultFont").toString() );
+
+        ui.statusbarFontComboBox->setCurrentFont(font);
+        ui.fontComboBox->setCurrentFont(defaultFont);
 	
 	ui.loadOnStartCheckBox->setChecked( settings.value( "RecentFiles/OpenLastFile", true ).toBool() );
 	ui.saveCursorCheckBox->setChecked( settings.value( "RecentFiles/SavePosition", true ).toBool() );
@@ -117,30 +111,31 @@ void OptionsDialog::reaSettings()
 	ui.editorTopSpaceSpinBox->setValue( settings.value("EditorTopSpace", 0).toInt());
 	ui.editorBottomSpaceSpinBox->setValue( settings.value("EditorBottomSpace", 0).toInt());
 	ui.spinBox->setValue( settings.value("TimedWriting", 0 ).toInt());
-	ui.dateFormat->setText( settings.value("DateFormat", "dd MMMM yyyy dddd").toString());
-	ui.timeFormat->setText( settings.value("TimeFormat", "HH:mm").toString());
+        ui.dateComboBox->setCurrentIndex( settings.value("DateFormatInt", 0 ).toInt() );
 	ui.defaultSaveLocationLineEdit->setText( settings.value("DefaultDirectory", "").toString() );
-	
+        ui.twentyfourCheckBox->setChecked( settings.value("24-Hour" , true).toBool() );
+        ui.backgroundLineEdit->setText( settings.value("BackgroundImage", "").toString() );
+        ui.statusbarBoldCheckBox->setChecked( settings.value("BoldStatus", false).toBool() );
+        ui.statusbarItalicCheckBox->setChecked( settings.value("ItalicStatus", false).toBool() );
+        ui.statusbarSpinBox->setValue( settings.value("SizeStatus", 12).toInt() );
+        ui.fontSizeSpinBox->setValue( settings.value("DefaultFontSize", 12).toInt() );
+        ui.plaintextCheckBox->setChecked( settings.value("PlainText", false).toBool() );
+
 	QPalette palette;
 	
-	palette.setColor(ui.pbFontColor->backgroundRole(),
-		fcolor = settings.value("Colors/FontColor", "#808080" ).toString());
+        fcolor.setNamedColor( settings.value("Colors/FontColor", "#808080" ).toString() );
+        palette.setColor(ui.pbFontColor->backgroundRole(), fcolor );
 	ui.pbFontColor->setPalette(palette);	
 
-	palette.setColor(ui.pbStatusBarColor->backgroundRole(),
-		scolor = settings.value("Colors/StatusColor", "#202020" ).toString());
+        scolor.setNamedColor( settings.value("Colors/StatusColor", "#202020" ).toString() );
+        palette.setColor(ui.pbStatusBarColor->backgroundRole(), scolor );
 	ui.pbStatusBarColor->setPalette(palette);
 
 	
-	palette.setColor(ui.pbEditorBackColor->backgroundRole(),
-		bgcolor = settings.value("Colors/Background", "black" ).toString());
+        bgcolor.setNamedColor( settings.value("Colors/Background", "#000000" ).toString() );
+        palette.setColor(ui.pbEditorBackColor->backgroundRole(), bgcolor );
 	ui.pbEditorBackColor->setPalette(palette);
 	
-	palette.setColor(ui.pbStatusBarBgColor->backgroundRole(),
-		sbcolor = settings.value("Colors/StatusBg", "#808080").toString());
-	ui.pbStatusBarBgColor->setPalette(palette);
-
-
 }
 
 void OptionsDialog::writSettings()
@@ -153,10 +148,9 @@ void OptionsDialog::writSettings()
 	QSettings settings;
 #endif
 
-	settings.setValue("Colors/FontColor", fcolor.name() );
-	settings.setValue("Colors/Background", bgcolor.name() );
-	settings.setValue("Colors/StatusColor", scolor.name() );
-	settings.setValue("Colors/StatusBg", sbcolor.name() );
+        settings.setValue("Colors/FontColor", fcolor.name() );
+        settings.setValue("Colors/Background", bgcolor.name() );
+        settings.setValue("Colors/StatusColor", scolor.name() );
 
 	settings.setValue("RecentFiles/OpenLastFile", ui.loadOnStartCheckBox->isChecked() );
 	settings.setValue("RecentFiles/SavePosition", ui.saveCursorCheckBox->isChecked() );
@@ -176,28 +170,29 @@ void OptionsDialog::writSettings()
 	settings.setValue("EditorTopSpace", ui.editorTopSpaceSpinBox->value() );
 	settings.setValue("EditorBottomSpace", ui.editorBottomSpaceSpinBox->value() );
 	settings.setValue("PageCountFormula", ui.pageCountSpinBox->value() );
-	settings.setValue("DateFormat", ui.dateFormat->text() );
-	settings.setValue("TimeFormat", ui.timeFormat->text() );
+        settings.setValue("DateFormatInt", ui.dateComboBox->currentIndex() );
+        settings.setValue("DateFormat", ui.dateComboBox->currentText() );
 	settings.setValue("DefaultDirectory", ui.defaultSaveLocationLineEdit->text() );
+        settings.setValue("24-Hour", ui.twentyfourCheckBox->isChecked() );
+        settings.setValue("BackgroundImage", ui.backgroundLineEdit->text() );
+        settings.setValue("BoldStatus", ui.statusbarBoldCheckBox->isChecked() );
+        settings.setValue("ItalicStatus", ui.statusbarItalicCheckBox->isChecked() );
+        settings.setValue("SizeStatus", ui.statusbarSpinBox->value() );
+        settings.setValue("DefaultFontSize", ui.fontSizeSpinBox->value() );
+        settings.setValue("PlainText", ui.plaintextCheckBox->isChecked() );
 	
 	QFont font;
 	QFont defaultFont;
 	
 	font = ui.statusbarFontComboBox->currentFont();
-	font.setBold(ui.statusbarBoldCheckBox->isChecked() );
-	font.setItalic(ui.statusbarItalicCheckBox->isChecked() );
+        font.setBold( ui.statusbarBoldCheckBox->isChecked() );
+        font.setItalic( ui.statusbarItalicCheckBox->isChecked() );
 	font.setPointSize(ui.statusbarSpinBox->value() );
-	settings.setValue("Font/FileName_Settings", font.toString() );
-	
-	font = ui.statusbarFontComboBox->currentFont();
-	font.setBold(ui.statusbarBoldCheckBox->isChecked() );
-	font.setItalic(ui.statusbarItalicCheckBox->isChecked() );
-	font.setPointSize(ui.statusbarSpinBox->value() );
-	settings.setValue("Font/Statistics_Settings", font.toString() );
+        settings.setValue("StatusFont", font.toString() );
 
 	defaultFont = ui.fontComboBox->currentFont();
 	defaultFont.setPointSize(ui.fontSizeSpinBox->value() );
-	settings.setValue("Font/DefaultFont", defaultFont.toString() );
+        settings.setValue("DefaultFont", defaultFont.toString() );
    	
 }
 
@@ -211,25 +206,6 @@ void OptionsDialog::showEvent( QShowEvent * )
 {
 	reaSettings();
 }
-
-//STATUS BACKGROUND
-void OptionsDialog::on_pbStatusBarBgColor_clicked()
-{
-	showStatusBarBgColorDialog();
-}
-
-void OptionsDialog::showStatusBarBgColorDialog()
-{
-	QColor c = QColorDialog::getColor(sbcolor, this);
-	if (c.isValid())
-	{
-		QPalette palette;
-		palette.setColor(ui.pbStatusBarBgColor->backgroundRole(), sbcolor = c);
-		ui.pbStatusBarBgColor->setPalette(palette);
-		ui.pbStatusBarBgColor->setAutoFillBackground(true);
-	}
-}
-
 
 // BACKGROUND
 
@@ -287,3 +263,24 @@ void OptionsDialog::showFontColorDialog()
 		ui.pbFontColor->setAutoFillBackground(false);
 	}
 }
+
+void OptionsDialog::on_backgroundImagePushButton_clicked()
+{
+                QString fileName = QFileDialog::getOpenFileName(this, tr("Select Image"), QDir::homePath());
+                if (!fileName.isEmpty())
+                {
+                        ui.backgroundLineEdit->setText(fileName);
+                }
+}
+
+void OptionsDialog::on_restorePushButton_clicked()
+{
+#ifdef Q_OS_WIN32
+        QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+#else
+
+        QSettings settings;
+#endif
+        settings.clear();
+        reaSettings();
+    }

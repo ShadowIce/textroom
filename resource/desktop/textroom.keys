@@ -1,3 +1,0 @@
-text/textroom:
-	open=textroom %f
-	icon-filename=/usr/share/pixmaps/textroom-doc.png

@@ -28,14 +28,27 @@
 ****************************************************************************/
 
 
-#include "helpdialog.h"
+#ifndef __HELPDIALOG_H__
+#define __HELPDIALOG_H__
+
 #include <QtGui>
 #include <QWidget>
-#include "textroom.h"
 
-HelpDialog::HelpDialog(QWidget *parent)
-	:QDialog(parent)
+#include "ui_helpdialog.h"
+
+class TextRoom;
+
+class HelpDialog: public QDialog
 {
-	ui.setupUi(this);
+	Q_OBJECT
+	
+public:
+	HelpDialog(QWidget *parent = 0);
 
-}
+private:
+	Ui::HelpDialog ui;
+};
+
+#endif
+
+

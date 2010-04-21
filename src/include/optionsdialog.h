@@ -27,15 +27,50 @@
 **
 ****************************************************************************/
 
+#ifndef __OPTIONSDIALOG_H__
+#define __OPTIONSDIALOG_H__
 
-#include "helpdialog.h"
-#include <QtGui>
-#include <QWidget>
-#include "textroom.h"
+#include <QDialog>
 
-HelpDialog::HelpDialog(QWidget *parent)
-	:QDialog(parent)
+#include "ui_optionsdialog.h"
+
+class OptionsDialog : public QDialog
 {
-	ui.setupUi(this);
+	Q_OBJECT
 
-}
+public:
+	OptionsDialog(QWidget *parent = 0);
+
+private slots:
+	void reaSettings();
+	void writSettings();
+	void on_pushButtonOk_clicked();
+	void on_pbFontColor_clicked();
+	void on_pbEditorBackColor_clicked();
+        void on_pbStatusBarColor_clicked();
+        void on_backgroundImagePushButton_clicked();
+        void on_restorePushButton_clicked();
+	void showFontColorDialog();
+	void showBackgroundDialog();
+	void showStatusColorDialog();
+	void startAlarm();
+	void selectDir();
+
+private:
+        QColor fcolor;
+        QColor bgcolor;
+        QColor scolor;
+        QColor sbcolor;
+	int setAlarm;
+	QString dirSelected;
+        QDate date;
+
+private:
+
+	Ui::OptionsDialog ui;
+
+protected:
+	void showEvent( QShowEvent * );
+};
+
+#endif // __OPTIONSDIALOG_H__

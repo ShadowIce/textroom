@@ -1,55 +1,60 @@
 TEMPLATE = app
 TARGET = textroom
-DEPENDPATH += . resource src ui
-INCLUDEPATH += . src /usr/include/SDL
-DESTDIR += bin
-OBJECTS_DIR += build
-MOC_DIR += build
-UI_DIR += build
-RCC_DIR += build
-HEADERS += src/helpdialog.h \
- src/optionsdialog.h \
- src/textroom.h \
- src/searchdialog.h \
- src/font.h
-FORMS += ui/optionsdialog.ui ui/textroom.ui ui/helpdialog.ui ui/font.ui
+DEPENDPATH += . \
+    resource \
+    src \
+    ui
+INCLUDEPATH += . \
+    src \
+    src/include \
+    /usr/include \
+    /usr/include/hunspell \
+    /usr/include/SDL
+DESTDIR += .
+OBJECTS_DIR += temp
+MOC_DIR += temp
+UI_DIR += temp
+RCC_DIR += temp
+HEADERS += src/include/helpdialog.h \
+    src/include/optionsdialog.h \
+    src/include/textroom.h \
+    src/include/searchdialog.h \
+    src/include/font.h \
+    src/include/about.h
+FORMS += ui/optionsdialog.ui \
+    src/ui/textroom.ui \
+    src/ui/helpdialog.ui \
+    src/ui/font.ui \
+    src/ui/about.ui
 SOURCES += src/helpdialog.cpp \
- src/main.cpp \
- src/optionsdialog.cpp \
- src/textroom.cpp \
- src/searchdialog.cpp \
- src/font.cpp
+    src/main.cpp \
+    src/optionsdialog.cpp \
+    src/textroom.cpp \
+    src/searchdialog.cpp \
+    src/font.cpp \
+    src/about.cpp
 RESOURCES += resource/textroom.qrc
-CONFIG += release build_all
-RC_FILE = textroom.rc
+CONFIG += release \
+    build_all
 INSTALLS += data \
- target \
- documentation \
- icon \
- icon-doc \
- desktop \
- kdedesktop \
- kdemime \
- gnomemime \
- gnomekeys
-data.path = /usr/local/share/textroom
+    target \
+    desktop \
+    icon
+LIBS = -lSDL \
+    -lSDLmain \
+    -lSDL_mixer \
+    -lhunspell
+QT += core \
+    gui
+
+data.path = /usr/share/textroom
 data.files = resource/sounds/*
-target.path = /usr/local/bin
-documentation.path = /usr/local/textroom/doc
-documentation.files = docs/*
+target.path = /usr/bin
+desktop.path = /usr/share/applications
+desktop.files = resource/desktop/textroom.desktop
 icon.path = /usr/share/pixmaps
 icon.files = resource/images/textroom.png
-icon-doc.path = /usr/share/pixmaps
-icon-doc.files = resource/images/textroom-doc.png
-desktop.path = /usr/share/applications
-desktop.files = resource/desktop/TextRoom.desktop
-kdedesktop.path = ~/.local/share/applications
-kdedesktop.files = resource/desktop/TextRoom.desktop
-kdemime.path = ~/.kde/share/mimelnk/text
-kdemime.files = resource/desktop/textroom.desktop
-gnomemime.path = ~/.gnome/mime-info
-gnomemime.files = resource/desktop/textroom.mime
-gnomekeys.path = ~/.gnome/mime-info
-gnomekeys.files = resource/desktop/textroom.keys
-LIBS = -lSDL -lSDLmain -lSDL_mixer
-QT += core gui
+
+unix:system(xdg-icon-resource install --context mimetypes --size 48 ./resource/images/textroom-doc.png application-x-txr)
+unix:system(xdg-mime install ./resource/desktop/textroom-txr-mime.xml)
+unix:system(xdg-mime default textroom.desktop application/x-txr)	
