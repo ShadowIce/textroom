@@ -39,6 +39,7 @@ OptionsDialog::OptionsDialog(QWidget *parent)
 	reaSettings();
 
 	connect(ui.pushButton, SIGNAL( clicked() ), this, SLOT( startAlarm() ) );
+	connect(ui.browseButton, SIGNAL( clicked() ), this, SLOT( selectDir() ) );
 }
 
 void OptionsDialog::startAlarm()
@@ -54,6 +55,12 @@ void OptionsDialog::startAlarm()
 	setAlarm = 0;
 	writSettings();
 	}
+}
+
+void OptionsDialog::selectDir()
+{
+	dirSelected = QFileDialog::getExistingDirectory(this, "Select Directory", QDir::homePath());
+	ui.defaultSaveLocationLineEdit->setText( dirSelected );
 }
 
 void OptionsDialog::reaSettings()
@@ -102,16 +109,17 @@ void OptionsDialog::reaSettings()
 	ui.scrollBarCheckBox->setChecked( settings.value("ScrollBar", true).toBool() );
 	ui.pageCountCheckBox->setChecked( settings.value("PageCount", false).toBool() );
 	ui.soundCheckBox->setChecked( settings.value("Sound", true).toBool() );
-	QString datetext = settings.value("Deadline", todaytext).toString();
-	QDate date;
-	QDate dateselected = date.fromString(datetext, "yyyyMMdd");
-	ui.calendarWidget->setSelectedDate(dateselected);
+	ui.characterCountCheckBox->setChecked( settings.value("CharacterCount", false).toBool() );
+        QString datetext = settings.value("Deadline", todaytext).toString();
+        date = QDate::fromString(datetext, "yyyyMMdd");
+        ui.calendarWidget->setSelectedDate(date);
 	ui.editorWidthSpinBox->setValue( settings.value	("EditorWidth", 800).toInt());  
 	ui.editorTopSpaceSpinBox->setValue( settings.value("EditorTopSpace", 0).toInt());
 	ui.editorBottomSpaceSpinBox->setValue( settings.value("EditorBottomSpace", 0).toInt());
 	ui.spinBox->setValue( settings.value("TimedWriting", 0 ).toInt());
 	ui.dateFormat->setText( settings.value("DateFormat", "dd MMMM yyyy dddd").toString());
-	ui.timeFormat->setText( settings.value("TimeFormat", "HH:MM").toString());
+	ui.timeFormat->setText( settings.value("TimeFormat", "HH:mm").toString());
+	ui.defaultSaveLocationLineEdit->setText( settings.value("DefaultDirectory", "").toString() );
 	
 	QPalette palette;
 	
@@ -160,6 +168,7 @@ void OptionsDialog::writSettings()
 	settings.setValue("AutoSave", ui.autoSaveCheckBox->isChecked() );
 	settings.setValue("FlowMode", ui.flowModeCheckBox->isChecked() );
 	settings.setValue("PageCount", ui.pageCountCheckBox->isChecked() );
+	settings.setValue("CharacterCount", ui.characterCountCheckBox->isChecked() );
 	settings.setValue("WordCount", ui.wordCountSpinBox->value() );
 	settings.setValue("Deadline", ui.calendarWidget->selectedDate().toString("yyyyMMdd"));
 	settings.setValue("EditorWidth", ui.editorWidthSpinBox->value() );
@@ -169,7 +178,8 @@ void OptionsDialog::writSettings()
 	settings.setValue("PageCountFormula", ui.pageCountSpinBox->value() );
 	settings.setValue("DateFormat", ui.dateFormat->text() );
 	settings.setValue("TimeFormat", ui.timeFormat->text() );
-
+	settings.setValue("DefaultDirectory", ui.defaultSaveLocationLineEdit->text() );
+	
 	QFont font;
 	QFont defaultFont;
 	

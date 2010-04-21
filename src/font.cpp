@@ -35,22 +35,79 @@ SelectFont::SelectFont(QWidget *parent) : QDialog(parent)
 
 {
 	ui.setupUi(this);
-	connect(ui.okPushButton, SIGNAL(clicked()), this, SLOT(accept()));
-	connect(ui.cancelPushButton, SIGNAL(clicked()), this, SLOT(reject()));
+	readSettings();
 }
 
-QString SelectFont::useSelectFont(QWidget *parent)
+void SelectFont::readSettings()
 {
-	SelectFont *sf = new SelectFont(parent);
-	sf->setModal(true);
-	QString family;
-	if (sf->exec() == QDialog::Accepted)
+#ifdef Q_OS_WIN32
+	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+#else
+
+	QSettings settings;
+#endif
+
+	QFont font;
+	QString currentFormat = settings.value("FontFamily", ui.fontComboBox->currentFont() ).toString();
+	font.fromString(currentFormat);
+	ui.fontComboBox->setCurrentFont( font );
+	ui.boldCheckBox->setChecked( font.bold() );
+	ui.italicCheckBox->setChecked( font.italic() );
+	ui.sizeSpinBox->setValue( font.pointSize() );
+	
+	QPalette palette;
+	QString color = settings.value("FontColor", "#000000").toString();
+	fcolor.setNamedColor( color );
+	palette.setColor(ui.fontColorPushButton->backgroundRole(),
+		fcolor);
+	ui.fontColorPushButton->setPalette(palette);
+}
+
+void SelectFont::writeSettings()
+{
+	#ifdef Q_OS_WIN32
+	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+#else
+
+	QSettings settings;
+#endif
+
+	settings.setValue("FontColor", fcolor.name() );
+	
+	QFont font;
+	font = ui.fontComboBox->currentFont();
+	font.setBold(ui.boldCheckBox->isChecked() );
+	font.setItalic(ui.italicCheckBox->isChecked() );
+	font.setPointSize(ui.sizeSpinBox->value() );
+	
+	settings.setValue("FontFamily", font.toString() );
+}
+
+void SelectFont::on_okPushButton_clicked()
+{
+	writeSettings();
+	accept();
+}
+
+void SelectFont::on_fontColorPushButton_clicked()
+{
+	showColorDialog();
+}
+
+void SelectFont::showColorDialog()
+{
+	QColor c = QColorDialog::getColor(fcolor, this);
+	if (c.isValid())
 	{
-		family = sf->ui.fontComboBox->currentText();
+		QPalette palette;
+		palette.setColor(ui.fontColorPushButton->backgroundRole(), fcolor = c);
+		ui.fontColorPushButton->setPalette(palette);
+		ui.fontColorPushButton->setAutoFillBackground(true);
 	}
-	else
-	{
-		family = "";
-	}
-	return family;
+}
+
+
+void SelectFont::showEvent( QShowEvent * )
+{
+	readSettings();
 }

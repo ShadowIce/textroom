@@ -43,9 +43,20 @@ class SelectFont : public QDialog
 public:
 	SelectFont(QWidget *parent = 0);
 	QString useSelectFont(QWidget *parent = 0);
+	
+private slots:
+	void readSettings();
+	void writeSettings();
+	void on_okPushButton_clicked();
+	void on_fontColorPushButton_clicked();
+	void showColorDialog();
 
 private:
+	QColor fcolor;
 	Ui::SelectFont ui;
+	
+protected:
+	void showEvent( QShowEvent * );
 };
 
 #endif

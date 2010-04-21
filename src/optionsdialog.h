@@ -54,6 +54,7 @@ private slots:
 	void showStatusColorDialog();
 	void showStatusBarBgColorDialog();
 	void startAlarm();
+	void selectDir();
 
 private:
 	QColor fcolor;
@@ -61,6 +62,8 @@ private:
 	QColor scolor;
 	QColor sbcolor;
 	int setAlarm;
+	QString dirSelected;
+        QDate date;
 
 private:
 

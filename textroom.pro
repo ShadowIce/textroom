@@ -20,7 +20,7 @@ SOURCES += src/helpdialog.cpp \
  src/searchdialog.cpp \
  src/font.cpp
 RESOURCES += resource/textroom.qrc
-CONFIG += release
+CONFIG += release build_all
 RC_FILE = textroom.rc
 INSTALLS += data \
  target \
@@ -52,3 +52,4 @@ gnomemime.files = resource/desktop/textroom.mime
 gnomekeys.path = ~/.gnome/mime-info
 gnomekeys.files = resource/desktop/textroom.keys
 LIBS = -lSDL -lSDLmain -lSDL_mixer
+QT += core gui

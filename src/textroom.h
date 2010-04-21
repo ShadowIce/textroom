@@ -106,9 +106,10 @@ private:
 	QString deadlinetext;
 	QDate deadline;
 	QDate today;
-	QString editDate;
 	QString dateFormat;
 	QString timeFormat;
+ 	QString defaultDir;
+        QString shownName;
 	int wordcount;
 	int parasold;
 	int parasnew;
@@ -128,8 +129,12 @@ private:
 	int cPosition;
 	int textSize;
 	int pageCount;
+	int characterCount;
 	QString pageCountText;
 	QString pageText;
+	QString characterCountText;
+	QString characterText;
+	QString selectedText;
 	int pageCountFormula;
 	bool ind;
 	bool isAutoSave;
@@ -138,6 +143,7 @@ private:
 	bool isIndent;
 	bool isScrollBarVisible;
 	bool isPageCount;
+	bool isCharacterCount;
 	QString filename1;
 	QString filename2;
 	QByteArray ba1;
