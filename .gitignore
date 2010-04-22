@@ -12,3 +12,4 @@ release/
 *.user
 *.idb
 *.pdb
+*.dll
