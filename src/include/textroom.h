@@ -33,10 +33,6 @@
 #include <QtGui>
  
 #include "ui_textroom.h"
-#include "SDL/SDL.h"
-// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:  #include "SDL_mixer/SDL_mixer.h"
-#include "SDL/SDL_mixer.h"
-#include "hunspell/hunspell.hxx"
 
 class QShortcut;
 class QFileSystemWatcher;
@@ -48,6 +44,7 @@ class AboutDialog;
 class AspellConfig;
 class AspellSpeller;
 class Hunspell;
+struct Mix_Chunk;
 
 class TextRoom : public QWidget, public Ui::TextRoomMain
 {

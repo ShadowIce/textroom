@@ -21,7 +21,7 @@ HEADERS += src/include/helpdialog.h \
     src/include/searchdialog.h \
     src/include/font.h \
     src/include/about.h
-FORMS += ui/optionsdialog.ui \
+FORMS += src/ui/optionsdialog.ui \
     src/ui/textroom.ui \
     src/ui/helpdialog.ui \
     src/ui/font.ui \
@@ -44,7 +44,6 @@ INSTALLS += data \
     mime \
     icon
 LIBS = -lSDL \
-    -lSDLmain \
     -lSDL_mixer \
     -lhunspell
 QT += core \

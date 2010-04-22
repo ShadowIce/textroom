@@ -5,7 +5,7 @@ Makefile
 temp/
 debug/
 release/
-sound/
+sounds/
 dict/
 images/
 *.sln

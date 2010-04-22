@@ -35,10 +35,11 @@
 #include "searchdialog.h"
 #include "font.h"
 #include "about.h"
-#include "SDL/SDL.h"
-// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:  #include "SDL_mixer/SDL_mixer.h"
-#include "SDL/SDL_mixer.h"
-#include "iostream"
+#include <SDL/SDL.h>
+// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:  #include <SDL_mixer/SDL_mixer.h>
+#include <SDL/SDL_mixer.h>
+#include <iostream>
+#include <hunspell/hunspell.hxx>
 
 TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 		: QWidget(parent, f), sentenceTally(0)
