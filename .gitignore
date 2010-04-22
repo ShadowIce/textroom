@@ -2,3 +2,13 @@ bin/
 build/
 *~
 Makefile
+temp/
+debug/
+release/
+*.sln
+*.vcproj
+*.ncb
+*.suo
+*.user
+*.idb
+*.pdb
