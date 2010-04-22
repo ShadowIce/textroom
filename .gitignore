@@ -5,6 +5,9 @@ Makefile
 temp/
 debug/
 release/
+sound/
+dict/
+images/
 *.sln
 *.vcproj
 *.ncb
