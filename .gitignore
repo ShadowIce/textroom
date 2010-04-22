@@ -6,7 +6,7 @@ temp/
 debug/
 release/
 sounds/
-dict/
+dicts/
 images/
 *.sln
 *.vcproj

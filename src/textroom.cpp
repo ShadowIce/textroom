@@ -65,42 +65,50 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
         aboutDialog = new AboutDialog(this);
 
 // Sound adjustments.
-        int audio_rate = 11025;
-        Uint16 audio_format = AUDIO_S8;
-        int audio_channels = 2;
+	int audio_rate = 44100;
+	Uint16 audio_format = AUDIO_S16SYS;
+	int audio_channels = 2;
 	int audio_buffers = 1024;
 	
 	if ( SDL_Init(SDL_INIT_AUDIO) < 0 ) {
-	fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
-	exit(1);
+		fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
+		exit(1);
 	}
 	atexit(SDL_Quit);
 	
 	if(Mix_OpenAudio(audio_rate, audio_format, audio_channels, audio_buffers) != 0) {
-	printf("Unable to initialize audio: %s\n", Mix_GetError());
-	exit(1);
+		printf("Unable to initialize audio: %s\n", Mix_GetError());
+		exit(1);
 	}
 
 // Load sounds.
-        soundenter = Mix_LoadWAV("/usr/share/sounds/keyenter.wav");
+#ifdef Q_OS_WIN32
+	soundany = Mix_LoadWAV("sounds/keyany.wav");
+#else
+	soundenter = Mix_LoadWAV("/usr/share/sounds/keyenter.wav");
+#endif
 	if(soundenter == NULL) {
 		printf("Unable to load WAV file: %s\n", Mix_GetError());
 	}
 
-        soundany = Mix_LoadWAV("/usr/share/sounds/keyany.wav");
+#ifdef Q_OS_WIN32
+	soundany = Mix_LoadWAV("sounds/keyany.wav");
+#else
+	soundany = Mix_LoadWAV("/usr/share/sounds/keyany.wav");
+#endif
 	if(soundany == NULL) {
 		printf("Unable to load WAV file: %s\n", Mix_GetError());
 	}
 		
-// Create the keyboard shortcuts.
+	// Create the keyboard shortcuts.
 	new QShortcut ( QKeySequence(QKeySequence::New), this, SLOT( newFile() ) );
 	new QShortcut ( QKeySequence(QKeySequence::Open), this, SLOT( open() ) );
 	new QShortcut ( QKeySequence(QKeySequence::Save), this, SLOT( save() ) );
 	new QShortcut ( QKeySequence(QKeySequence::HelpContents), this, SLOT( help() ) );
-        new QShortcut ( QKeySequence(tr("F2", "Options")), this, SLOT( options() ) );
-        new QShortcut ( QKeySequence(tr("F3", "About")), this, SLOT( about() ) );
-        new QShortcut ( QKeySequence(tr("F5", "Spell Check")), this, SLOT( spellCheck() ) );
-        new QShortcut ( QKeySequence(tr("Ctrl+P", "Print")), this, SLOT( print() ) );
+	new QShortcut ( QKeySequence(tr("F2", "Options")), this, SLOT( options() ) );
+	new QShortcut ( QKeySequence(tr("F3", "About")), this, SLOT( about() ) );
+	new QShortcut ( QKeySequence(tr("F5", "Spell Check")), this, SLOT( spellCheck() ) );
+	new QShortcut ( QKeySequence(tr("Ctrl+P", "Print")), this, SLOT( print() ) );
 	new QShortcut ( QKeySequence(tr("Shift+Ctrl+S", "Save As")), this, SLOT( saveAs() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+D", "Insert Date")), this, SLOT( insertDate() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+T", "Insert Time")), this, SLOT( insertTime() ) );	
@@ -110,8 +118,8 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	new QShortcut ( QKeySequence(tr("F11", "Toggle Fullscreen")) , this, SLOT( togleFullScreen() ) );
 	new QShortcut ( QKeySequence(tr("Esc", "Toggle Fullscreen")) , this, SLOT( togleEscape() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+M", "Minimize TextRoom")) , this, SLOT( showMinimized() ) );
-        new QShortcut ( QKeySequence(tr("F4", "Find Next")) , this, SLOT( find_next() ) );
-        new QShortcut ( QKeySequence(tr("Ctrl+F4", "Find Previous")) , this, SLOT( find_previous() ) );
+	new QShortcut ( QKeySequence(tr("F4", "Find Next")) , this, SLOT( find_next() ) );
+	new QShortcut ( QKeySequence(tr("Ctrl+F4", "Find Previous")) , this, SLOT( find_previous() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+B", "Bold")) , this, SLOT( textBold() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+I", "Italic")) , this, SLOT( textItalic() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+Up", "Increase Text Size")) , this, SLOT( textSizeUp() ) );
@@ -996,69 +1004,77 @@ void TextRoom::about()
 
 void TextRoom::spellCheck()
 {
-              QString textVar = textEdit->document()->toPlainText();
-              textVar.replace(" ", "+");
-              textVar.replace("\n", "+");
-              textVar.replace("\t", "+");
-              textVar.replace("\r", "+");
-              textVar.replace(".", "+");
-              textVar.replace(",", "+");
-              textVar.replace(";", "+");
-              textVar.replace("!", "+");
-              textVar.replace("?", "+");
-              textVar.replace("(", "+");
-              textVar.replace(")", "+");
-              textVar.replace(":", "+");
-              textVar.replace("@", "+");
-              textVar.replace("&", "+");
-              textVar.replace("$", "+");
-              textVar.replace("%", "+");
-              textVar.replace("\"", "+");
-              QStringList wordList = textVar.split("+", QString::SkipEmptyParts);
+	QString textVar = textEdit->document()->toPlainText();
+	textVar.replace(" ", "+");
+	textVar.replace("\n", "+");
+	textVar.replace("\t", "+");
+	textVar.replace("\r", "+");
+	textVar.replace(".", "+");
+	textVar.replace(",", "+");
+	textVar.replace(";", "+");
+	textVar.replace("!", "+");
+	textVar.replace("?", "+");
+	textVar.replace("(", "+");
+	textVar.replace(")", "+");
+	textVar.replace(":", "+");
+	textVar.replace("@", "+");
+	textVar.replace("&", "+");
+	textVar.replace("$", "+");
+	textVar.replace("%", "+");
+	textVar.replace("\"", "+");
+	QStringList wordList = textVar.split("+", QString::SkipEmptyParts);
 
-              char * affFile;
-              char * dicFile;
-              if (language == 0)
-              {
-                    affFile = (char *) "/usr/share/myspell/dicts/en_US.aff";
-                    dicFile = (char *) "/usr/share/myspell/dicts/en_US.dic";
-              }
-              else if (language == 1)
-              {
-                    affFile = (char *) "/usr/share/myspell/dicts/tr.aff";
-                    dicFile = (char *) "/usr/share/myspell/dicts/tr.dic";
-              }
+	QString affFileName;
+	QString dicFileName;
+#ifdef Q_OS_WIN32
+	affFileName = "dicts/";
+	dicFileName = "dicts/";
+#else
+	affFileName = "/usr/share/myspell/dicts/";
+	dicFileName = "/usr/share/myspell/dicts/";
+#endif
 
-              pMS= new Hunspell(affFile, dicFile);
-              QTextCharFormat highlightFormat;
-              highlightFormat.setUnderlineColor(Qt::red);
-              highlightFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-              QTextCharFormat defaultFormat;
-              defaultFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
-              if ( !isHighlighted )
-                 isHighlighted = true;
-              else
-              {
-                  isHighlighted = false;
-              }
-              QTextCursor findCursor(textEdit->document());
-              findCursor.movePosition(QTextCursor::Start);
+	if (language == 0)
+	{
+		affFileName.append("en_US.aff");
+		dicFileName.append("en_US.dic");
+	}
+	else if (language == 1)
+	{
+		affFileName.append("tr.aff");
+		dicFileName.append("tr.dic");
+	}
 
-              foreach (QString word, wordList)
-              {
-              QTextCursor highlightCursor(textEdit->document()->find(word, findCursor));
-              findCursor.setPosition(highlightCursor.position());
-              findCursor.movePosition(QTextCursor::EndOfWord);
-              QByteArray ba = word.toUtf8();
-              char * wordChar = ba.data();
-              int correct = pMS->spell(wordChar);
-              if ( !correct && isHighlighted )
-                    highlightCursor.mergeCharFormat(highlightFormat);
-              else
-              {
-                    QTextCursor notUnderlined(textEdit->document()->find(" ", findCursor));
-                    notUnderlined.mergeCharFormat(defaultFormat);
-                    highlightCursor.mergeCharFormat(defaultFormat);
-                }
-              }
-          }
+	pMS= new Hunspell(affFileName.toLocal8Bit(), dicFileName.toLocal8Bit());
+	QTextCharFormat highlightFormat;
+	highlightFormat.setUnderlineColor(Qt::red);
+	highlightFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
+	QTextCharFormat defaultFormat;
+	defaultFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
+	if ( !isHighlighted )
+		isHighlighted = true;
+	else
+	{
+		isHighlighted = false;
+	}
+	QTextCursor findCursor(textEdit->document());
+	findCursor.movePosition(QTextCursor::Start);
+
+	foreach (QString word, wordList)
+	{
+		QTextCursor highlightCursor(textEdit->document()->find(word, findCursor));
+		findCursor.setPosition(highlightCursor.position());
+		findCursor.movePosition(QTextCursor::EndOfWord);
+		QByteArray ba = word.toUtf8();
+		char * wordChar = ba.data();
+		int correct = pMS->spell(wordChar);
+		if ( !correct && isHighlighted )
+			highlightCursor.mergeCharFormat(highlightFormat);
+		else
+		{
+			QTextCursor notUnderlined(textEdit->document()->find(" ", findCursor));
+			notUnderlined.mergeCharFormat(defaultFormat);
+			highlightCursor.mergeCharFormat(defaultFormat);
+		}
+	}
+}
