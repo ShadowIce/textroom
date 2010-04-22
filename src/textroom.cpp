@@ -62,7 +62,7 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	optionsDialog = new OptionsDialog(this);
 	helpDialog = new HelpDialog(this);
 	selectFont = new SelectFont(this);
-        aboutDialog = new AboutDialog(this);
+	aboutDialog = new AboutDialog(this);
 
 // Sound adjustments.
 	int audio_rate = 44100;
@@ -115,8 +115,8 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	new QShortcut ( QKeySequence(tr("Ctrl+Q", "Quit Application")) , this, SLOT( close() ) );
 	new QShortcut ( QKeySequence(tr("Alt+F4", "Quit Application")) , this, SLOT( close() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+F", "Find Text")) , this, SLOT( find() ) );
-	new QShortcut ( QKeySequence(tr("F11", "Toggle Fullscreen")) , this, SLOT( togleFullScreen() ) );
-	new QShortcut ( QKeySequence(tr("Esc", "Toggle Fullscreen")) , this, SLOT( togleEscape() ) );
+	new QShortcut ( QKeySequence(tr("F11", "Toggle Fullscreen")) , this, SLOT( toggleFullScreen() ) );
+	new QShortcut ( QKeySequence(tr("Esc", "Toggle Fullscreen")) , this, SLOT( toggleEscape() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+M", "Minimize TextRoom")) , this, SLOT( showMinimized() ) );
 	new QShortcut ( QKeySequence(tr("F4", "Find Next")) , this, SLOT( find_next() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+F4", "Find Previous")) , this, SLOT( find_previous() ) );
@@ -193,22 +193,23 @@ void TextRoom::playSound(Mix_Chunk *sound)
 // Play the sounds if sound is enabled.
 	if(isSound)
 	{
-	channel = Mix_PlayChannel(-1, sound, 0);
-	if(channel == -1) {
-	printf("Unable to play WAV file: %s\n", Mix_GetError()); }
+		channel = Mix_PlayChannel(-1, sound, 0);
+		if(channel == -1) {
+			printf("Unable to play WAV file: %s\n", Mix_GetError());
+		}
 	}
 }
 
-void TextRoom::togleEscape()
+void TextRoom::toggleEscape()
 {
 // Toggle Fullscreen or if visible hide Help when ESC is pressed.
-        if ( helpDialog->isVisible() || aboutDialog->isVisible()  )
+	if ( helpDialog->isVisible() || aboutDialog->isVisible()  )
 	{
-	helpDialog->hide();
-        aboutDialog->hide();
+		helpDialog->hide();
+		aboutDialog->hide();
 	}
 	else if ( isFullScreen() )
-		togleFullScreen();
+		toggleFullScreen();
 	else
 		close();
 
@@ -234,7 +235,7 @@ void TextRoom::insertTime()
         textEdit->insertPlainText(clock);
 }
 
-void TextRoom::togleFullScreen()
+void TextRoom::toggleFullScreen()
 {
 // Toggle Full Screen.
 
@@ -616,7 +617,7 @@ void TextRoom::readSettings()
 	QFile file( settings.fileName() );
 	if ( !file.exists() )
 	{
-		togleFullScreen();
+		toggleFullScreen();
 		writeSettings();
 		return;
 	}
@@ -672,33 +673,33 @@ void TextRoom::readSettings()
 	editorBottomSpace = settings.value("EditorBottomSpace", 0).toInt();
 	alarm = settings.value("TimedWriting", 0).toInt();
 	pageCountFormula = settings.value("PageCountFormula", 250).toInt();
-        dateFormat = settings.value("DateFormat", "d MMMM yyyy dddd").toString();
-        timeFormatBool = settings.value("24-Hour", true ).toBool();
+	dateFormat = settings.value("DateFormat", "d MMMM yyyy dddd").toString();
+	timeFormatBool = settings.value("24-Hour", true ).toBool();
 	defaultDir = settings.value("DefaultDirectory", QDir::homePath()).toString();
-        backgroundImage = settings.value("BackgroundImage", "").toString();
-        isPlainText = settings.value("PlainText", false).toBool();
-        language = settings.value("Language", 0).toInt();
+	backgroundImage = settings.value("BackgroundImage", "").toString();
+	isPlainText = settings.value("PlainText", false).toBool();
+	language = settings.value("Language", 0).toInt();
 
-        if ( isPlainText )
-        {
-            QString text( textEdit->document()->toPlainText() );
-            textEdit->document()->clear();
-            textEdit->insertPlainText(text);
-            textEdit->setAcceptRichText( false );
-        }
-        else
-        {
-            textEdit->setAcceptRichText( true );
-        }
+	if ( isPlainText )
+	{
+		QString text( textEdit->document()->toPlainText() );
+		textEdit->document()->clear();
+		textEdit->insertPlainText(text);
+		textEdit->setAcceptRichText( false );
+	}
+	else
+	{
+		textEdit->setAcceptRichText( true );
+	}
 
-        if ( timeFormatBool )
-        {
-            timeFormat = "h:mm";
-        }
-        else
-        {
-            timeFormat = "h:mm AP";
-        }
+	if ( timeFormatBool )
+	{
+		timeFormat = "h:mm";
+	}
+	else
+	{
+		timeFormat = "h:mm AP";
+	}
 
 	horizontalSlider->setVisible( settings.value("ScrollBar", true).toBool() );
 	isScrollBarVisible = horizontalSlider->isVisible();
