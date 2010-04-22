@@ -1,4 +1,4 @@
-TextRoom v0.6.2 beta
+TextRoom v0.6.3 beta
 http://code.google.com/p/textroom/
 
 
@@ -24,20 +24,19 @@ TextRoom is a basic full-screen rich text editor for writers.
 
 2. Requirements
 ---------------
- * Qt >= 4.4, 
- * SDL >= 1.2.13,
- * SDL_mixer >= 1.2.8,
- * aspell >= 0.6.0.
+ * Qt >= 4.5.1 
+ * SDL >= 1.2.13
+ * SDL_mixer >= 1.2.8
+ * hunspell >= 1.2.6
 
 3. Installation
 ---------------
 To compile TextRoom, you will need the development packages
 (usually named -devel- or -dev in some distros) of the required packages. 
 
-Cd to the directory
-this README file is. Compilation includes three steps:
+Cd to the directory this README file is. Compilation includes three steps:
 
-qmake-qt4
+qmake
 make
 sudo make install
 make clean
@@ -48,6 +47,12 @@ The program stores its preferences in ~/.config/textroom/TextRoom.conf, but you 
 
 4. Features
 -----------
+-Version 0.6.3
+
+ * Migrated spellcheck to Hunspell.
+ * Universal Linuz installer.
+ * Fixed some bugs.
+
 -Version 0.6.2
 
  * Printing support.

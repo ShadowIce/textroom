@@ -81,12 +81,12 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	}
 
 // Load sounds.
-        soundenter = Mix_LoadWAV("/usr/share/textroom/keyenter.wav");
+        soundenter = Mix_LoadWAV("/usr/share/sounds/keyenter.wav");
 	if(soundenter == NULL) {
 		printf("Unable to load WAV file: %s\n", Mix_GetError());
 	}
 
-        soundany = Mix_LoadWAV("/usr/share/textroom/keyany.wav");
+        soundany = Mix_LoadWAV("/usr/share/sounds/keyany.wav");
 	if(soundany == NULL) {
 		printf("Unable to load WAV file: %s\n", Mix_GetError());
 	}
@@ -668,6 +668,7 @@ void TextRoom::readSettings()
 	defaultDir = settings.value("DefaultDirectory", QDir::homePath()).toString();
         backgroundImage = settings.value("BackgroundImage", "").toString();
         isPlainText = settings.value("PlainText", false).toBool();
+        language = settings.value("Language", 0).toInt();
 
         if ( isPlainText )
         {
@@ -1014,17 +1015,29 @@ void TextRoom::spellCheck()
               textVar.replace("\"", "+");
               QStringList wordList = textVar.split("+", QString::SkipEmptyParts);
 
-              pMS= new Hunspell("/usr/share/myspell/dicts/en_US.aff", "/usr/share/myspell/dicts/en_US.dic");
-              QTextCharFormat highlightFormat;
-              if ( !isHighlighted )
+              char * affFile;
+              char * dicFile;
+              if (language == 0)
               {
+                    affFile = (char *) "/usr/share/myspell/dicts/en_US.aff";
+                    dicFile = (char *) "/usr/share/myspell/dicts/en_US.dic";
+              }
+              else if (language == 1)
+              {
+                    affFile = (char *) "/usr/share/myspell/dicts/tr.aff";
+                    dicFile = (char *) "/usr/share/myspell/dicts/tr.dic";
+              }
+
+              pMS= new Hunspell(affFile, dicFile);
+              QTextCharFormat highlightFormat;
               highlightFormat.setUnderlineColor(Qt::red);
               highlightFormat.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-              isHighlighted = true;
-              }
+              QTextCharFormat defaultFormat;
+              defaultFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
+              if ( !isHighlighted )
+                 isHighlighted = true;
               else
               {
-                  highlightFormat.setUnderlineStyle(QTextCharFormat::NoUnderline);
                   isHighlighted = false;
               }
               QTextCursor findCursor(textEdit->document());
@@ -1038,9 +1051,13 @@ void TextRoom::spellCheck()
               QByteArray ba = word.toUtf8();
               char * wordChar = ba.data();
               int correct = pMS->spell(wordChar);
-              if ( !correct )
-                {
+              if ( !correct && isHighlighted )
                     highlightCursor.mergeCharFormat(highlightFormat);
+              else
+              {
+                    QTextCursor notUnderlined(textEdit->document()->find(" ", findCursor));
+                    notUnderlined.mergeCharFormat(defaultFormat);
+                    highlightCursor.mergeCharFormat(defaultFormat);
                 }
               }
           }

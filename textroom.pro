@@ -37,8 +37,11 @@ RESOURCES += resource/textroom.qrc
 CONFIG += release \
     build_all
 INSTALLS += data \
+    dict \
     target \
     desktop \
+    uninstaller \
+    mime \
     icon
 LIBS = -lSDL \
     -lSDLmain \
@@ -47,14 +50,22 @@ LIBS = -lSDL \
 QT += core \
     gui
 
-data.path = /usr/share/textroom
+data.path = /usr/share/sounds
 data.files = resource/sounds/*
 target.path = /usr/bin
 desktop.path = /usr/share/applications
 desktop.files = resource/desktop/textroom.desktop
+doc-icon.path = /usr/share/textroom
+doc-icon.files = resource/images/textroom-doc.png
+mime.path = /usr/share/textroom
+mime.files = resource/desktop/textroom-txr-mime.xml
+uninstaller.path = /usr/bin
+uninstaller.files = resource/desktop/textroom-uninstall
+dict.path = /usr/share/myspell/dicts
+dict.files = resource/dict/*
 icon.path = /usr/share/pixmaps
 icon.files = resource/images/textroom.png
 
-unix:system(xdg-icon-resource install --context mimetypes --size 48 ./resource/images/textroom-doc.png application-x-txr)
+unix:system(xdg-icon-resource install --context mimetypes --size 48 ./resource/images/textroom-doc.png application/x-txr)
 unix:system(xdg-mime install ./resource/desktop/textroom-txr-mime.xml)
 unix:system(xdg-mime default textroom.desktop application/x-txr)	

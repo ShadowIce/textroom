@@ -146,6 +146,7 @@ private:
 	int textSize;
 	int pageCount;
 	int characterCount;
+        int language;
 	QString pageCountText;
 	QString pageText;
 	QString characterCountText;
