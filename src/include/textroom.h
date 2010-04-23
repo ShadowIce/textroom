@@ -83,7 +83,6 @@ private slots:
 	void vPositionChanged();
 	void hSliderPositionChanged();
 	void spellCheck();
-	void cursorChanged();
 	 
 private:
 	bool maybeSave();
@@ -117,6 +116,7 @@ private:
 	QString shownName;
 	bool wordCountChanged;
 	int wordcount;
+	int words;
 	int parasold;
 	int parasnew;
 	QString wordcounttext;

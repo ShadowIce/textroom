@@ -154,10 +154,6 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	connect(horizontalSlider, SIGNAL(valueChanged(int)),
 			this, SLOT(hSliderPositionChanged()));
 
-// cursor position changed (text selection?)
-	connect(textEdit, SIGNAL(cursorPositionChanged()),
-		this, SLOT(cursorChanged()));
-
 // check if we need to open some file at startup
 	const QStringList args = QCoreApplication::arguments();
 	if (args.count() == 2)
@@ -506,8 +502,8 @@ void TextRoom::getFileStatus()
 	QString text, target, selectedText, pageText, characterText;
 	text = textEdit->document()->toPlainText();
 
-	if (!wordCountChanged) return;
-	const int words = getWordCount(text);
+	if (wordCountChanged)
+		words = getWordCount(text);
 	if (textEdit->textCursor().hasSelection())
 	{
 		const int wordsSelected = getWordCount(textEdit->textCursor().selection().toPlainText());
@@ -523,7 +519,8 @@ void TextRoom::getFileStatus()
 // Compute character count
 	if (isCharacterCount)
 	{
-		characterCount = textEdit->document()->characterCount() - parasold;
+		if (wordCountChanged)
+			characterCount = textEdit->document()->characterCount() - parasold;
 		characterText = tr(" Characters: %1").arg(characterCount);
 	}
 	if (wordcount > 0)
@@ -565,10 +562,6 @@ int TextRoom::getWordCount(const QString &text)
 	return words;
 }
 
-void TextRoom::cursorChanged()
-{
-	wordCountChanged = true;
-}
 
 void TextRoom::documentWasModified()
 {
