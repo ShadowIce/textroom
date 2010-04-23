@@ -83,6 +83,7 @@ private slots:
 	void vPositionChanged();
 	void hSliderPositionChanged();
 	void spellCheck();
+	void cursorChanged();
 	 
 private:
 	bool maybeSave();
@@ -94,6 +95,7 @@ private:
 	void loadFile(const QString &fileName);
 	void setCurrentFile(const QString &fileName);
 	void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
+	int getWordCount(const QString &text);
 
 	HelpDialog *helpDialog;
 	OptionsDialog *optionsDialog;
@@ -105,7 +107,6 @@ private:
 	QString curFile;
 	QString curDir;
 	QString lastSearch;
-	QString text;
 	QString deadlinetext;
 	QDate deadline;
 	QDate today;
@@ -114,6 +115,7 @@ private:
 	QString timeFormat;
 	QString defaultDir;
 	QString shownName;
+	bool wordCountChanged;
 	int wordcount;
 	int parasold;
 	int parasnew;
@@ -139,11 +141,6 @@ private:
 	int pageCount;
 	int characterCount;
 	int language;
-	QString pageCountText;
-	QString pageText;
-	QString characterCountText;
-	QString characterText;
-	QString selectedText;
 	QString backgroundImage;
 	int pageCountFormula;
 	bool isAutoSave;

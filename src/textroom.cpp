@@ -56,7 +56,7 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	wordcount = 0;
 	alarm = 0;
 	parasold = 0;
-        isHighlighted = false;
+	isHighlighted = false;
 
 // Create the dialog windows.
 	optionsDialog = new OptionsDialog(this);
@@ -83,7 +83,7 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 
 // Load sounds.
 #ifdef Q_OS_WIN32
-	soundany = Mix_LoadWAV("sounds/keyany.wav");
+	soundenter = Mix_LoadWAV("sounds/keyenter.wav");
 #else
 	soundenter = Mix_LoadWAV("/usr/share/sounds/keyenter.wav");
 #endif
@@ -129,12 +129,10 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	// Service: show cursor
 	new QShortcut ( QKeySequence(tr("Shift+F4", "Show Cursor")) , this, SLOT( sCursor() ) );
 
-// Adjust the settings file for Windows.
+// Create the settings file.
 #ifdef Q_OS_WIN32
 	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
-
-// Create the settings file.
 	QSettings settings;
 #endif	
 
@@ -156,7 +154,11 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	connect(horizontalSlider, SIGNAL(valueChanged(int)),
 			this, SLOT(hSliderPositionChanged()));
 
-	// check if we need to open some file at startup
+// cursor position changed (text selection?)
+	connect(textEdit, SIGNAL(cursorPositionChanged()),
+		this, SLOT(cursorChanged()));
+
+// check if we need to open some file at startup
 	const QStringList args = QCoreApplication::arguments();
 	if (args.count() == 2)
 	{
@@ -283,7 +285,7 @@ void TextRoom::newFile()
 		textEdit->setUndoRedoEnabled(true);
 		textEdit->document()->setModified(false);
 		textEdit->verticalScrollBar()->setValue(0);
-                textEdit->setFont(defaultFont);
+		textEdit->setFont(defaultFont);
 	}
 }
 
@@ -369,7 +371,7 @@ void TextRoom::loadFile(const QString &fileName)
 		return;
 	}
 
-        QByteArray data = file.readAll();
+	QByteArray data = file.readAll();
 	QTextCodec *codec = QTextCodec::codecForName("UTF-8");
 	QString str = codec->toUnicode(data);
 	
@@ -391,9 +393,9 @@ void TextRoom::loadFile(const QString &fileName)
 	{
 		textEdit->setFont(defaultFont);
 	}
-	QString text = textEdit->document()->toPlainText();
-	parasold = text.count("\n", Qt::CaseSensitive);
+	parasold = textEdit->document()->blockCount();
 	vPositionChanged();
+	wordCountChanged = true;
 	getFileStatus();
 }
 
@@ -401,7 +403,7 @@ bool TextRoom::maybeSave()
 {
 	if (textEdit->document()->isEmpty())
 	{
-	return true;
+		return true;
 	}
 	if (textEdit->document()->isModified())
 	{
@@ -481,88 +483,91 @@ void TextRoom::getFileStatus()
 {
 // Calculate deadline
 	QString showdeadline;
-	QString target;
-        int daysremaining;
-        QString todaytext = QDate::currentDate().toString("yyyyMMdd");
-        today = QDate::fromString(todaytext, "yyyyMMdd");
-        daysremaining = today.daysTo(deadline);
+	int daysremaining;
+	QString todaytext = QDate::currentDate().toString("yyyyMMdd");
+	today = QDate::fromString(todaytext, "yyyyMMdd");
+	daysremaining = today.daysTo(deadline);
 	QString daysto;
 	daysto.setNum(daysremaining);
-        if (daysremaining <= 0)
-        {
-            showdeadline = "";
-        }
-        else
-        {
-            showdeadline = daysto + " Days remaining. ";
-        }
-	int percent;
-	QString percenttext;
-	QString statsLabelStr;
-	QString statsLabelToolTip;
-// Show clock.
+	if (daysremaining <= 0)
+	{
+		showdeadline = "";
+	}
+	else
+	{
+		showdeadline = daysto + " Days remaining. ";
+	}
+// Show deadline + clock
 	QDateTime now = QDateTime::currentDateTime();
-        QString clock = now.toString( timeFormat );
-
-        const QString text( textEdit->document()->toPlainText() );
+	QString clock = now.toString( timeFormat );
+	deadlineLabel->setText(showdeadline + clock);
 
 //Compute word count
-	QRegExp wordsRX("\\s+");
-	QStringList list = text.split(wordsRX,QString::SkipEmptyParts);
-	QStringList listSelected = textEdit->textCursor().selection().toPlainText().split(wordsRX, QString::SkipEmptyParts);
-	const int words = list.count();
-	const int wordsSelected = listSelected.count();
-	if (wordsSelected == 0)
+	QString text, target, selectedText, pageText, characterText;
+	text = textEdit->document()->toPlainText();
+
+	if (!wordCountChanged) return;
+	const int words = getWordCount(text);
+	if (textEdit->textCursor().hasSelection())
 	{
-		selectedText = "";
+		const int wordsSelected = getWordCount(textEdit->textCursor().selection().toPlainText());
+		if (wordsSelected > 0)
+			selectedText = selectedText.setNum(wordsSelected) + "/";
 	}
-	else
-	{
-		selectedText = selectedText.setNum(wordsSelected);
-		selectedText = selectedText + "/";
-	}
+// Compute page count
 	if (isPageCount)
 	{
-		float pageC = ((words/pageCountFormula)+1);
-		pageCount = (int)pageC;
-		pageCountText = pageCountText.setNum(pageCount);
-                pageText = " Pages:" + pageCountText;
+		pageCount = (int)((words/pageCountFormula)+1);
+		pageText = tr(" Pages: %1").arg(pageCount);
 	}
-	else
-	{
-		pageText = "";
-	}
-// Compute Character Count
+// Compute character count
 	if (isCharacterCount)
 	{
-             QStringList charsWithoutLineEnds = text.split("\n", QString::SkipEmptyParts);
-	     QString charsCombined = charsWithoutLineEnds.join("");
-             QStringList charsWithoutReturns = charsCombined.split("\r", QString::SkipEmptyParts);
-	     charsCombined = charsWithoutReturns.join("");
-             QStringList charsWithoutTabs = charsCombined.split("\t", QString::SkipEmptyParts);
-	     charsCombined = charsWithoutTabs.join("");
-		characterCount = charsCombined.size();
-		characterCountText = characterCountText.setNum(characterCount);
-                characterText = " Characters:" + characterCountText;
+		characterCount = textEdit->document()->characterCount() - parasold;
+		characterText = tr(" Characters: %1").arg(characterCount);
 	}
-	else
+	if (wordcount > 0)
 	{
-		characterText = "";
+		int percent = (int)(words*100/wordcount);
+		target = tr(" Target: %1 (%2%)").arg(wordcount).arg(percent);
 	}
-	if (wordcount == 0)
-	{
-                        target = characterText + pageText;
-	}
-	else if (words < wordcount || words > wordcount)
-	{
-		float f = words*100/wordcount;
-		percent = (int)f;
-		percenttext = percenttext.setNum(percent);
-                target = " Target:" + wordcounttext + "(%" + percenttext + ")" + characterText + pageText;
-	}
-        deadlineLabel->setText(showdeadline + clock);
-        statsLabel->setText("Words:" + selectedText + tr("%1").arg(words) + target);
+	statsLabel->setText(tr("Words: %1%2%3%4%5").arg(selectedText).arg(words).arg(target).arg(characterText).arg(pageText));
+	wordCountChanged = false;
+}
 
+int TextRoom::getWordCount(const QString &text)
+{
+	int words = 0;
+	bool lastWasWhitespace = false;
+
+	for (int i = 0; i < text.count(); i++)
+	{
+		if (text.at(i).isSpace())
+		{
+			if (!lastWasWhitespace)
+			{
+				words++;
+			}
+			lastWasWhitespace = true;
+		}
+		else
+		{
+			lastWasWhitespace = false;
+		}
+	}
+
+	if ((!lastWasWhitespace) && (text.count() > 0))
+	{
+		// one more if the last character is not a whitespace
+		words++;
+	}
+
+	return words;
+}
+
+void TextRoom::cursorChanged()
+{
+	wordCountChanged = true;
 }
 
 void TextRoom::documentWasModified()
@@ -570,19 +575,18 @@ void TextRoom::documentWasModified()
 // If document is modified, do stuff.
 	setWindowModified(textEdit->document()->isModified());
 	
-	QString text = textEdit->document()->toPlainText();
-	parasnew = text.count("\n", Qt::CaseSensitive);
+	parasnew = textEdit->document()->blockCount();
 
 	if (isAutoSave && numChanges++ > 200) {
-		numChanges = 0;	
+		numChanges = 0;
 		autoSave();
-	} 
+	}
 
 	if ( isFlowMode && textEdit->document()->toPlainText().size() < prevLength ) {
 		textEdit->undo();
-	} 
+	}
 
-	prevLength=textEdit->document()->toPlainText().size();
+	prevLength = textEdit->document()->toPlainText().size();
 
 // If a new paragraph created, play keyenter, else play keyany.
 	if (parasnew > parasold)
@@ -594,6 +598,7 @@ void TextRoom::documentWasModified()
 
 	vPositionChanged();
 
+	wordCountChanged = true;
 }
 
 void TextRoom::alarmTime()
@@ -636,21 +641,21 @@ void TextRoom::readSettings()
 		move(pos);
 	}
 
-        QString foregroundColor = settings.value("Colors/FontColor", "#808080" ).toString();
-        QString back = settings.value("Colors/Background", "#000000" ).toString();
-        QString status_c = settings.value("Colors/StatusColor", "#202020" ).toString();
+	QString foregroundColor = settings.value("Colors/FontColor", "#808080" ).toString();
+	QString back = settings.value("Colors/Background", "#000000" ).toString();
+	QString status_c = settings.value("Colors/StatusColor", "#202020" ).toString();
 
-        loadStyleSheet(foregroundColor, back, status_c);
+	loadStyleSheet(foregroundColor, back, status_c);
 
 	// oxygen does weird stuff with the background
 	QApplication::setStyle("plastique");
 
-        QFont font;
-        font.fromString( settings.value("StatusFont").toString());
-        defaultFont.fromString( settings.value("DefaultFont").toString() );
+	QFont font;
+	font.fromString( settings.value("StatusFont").toString());
+	defaultFont.fromString( settings.value("DefaultFont").toString() );
 
-        statsLabel->setFont( font );
-        deadlineLabel->setFont ( font ) ;
+	statsLabel->setFont( font );
+	deadlineLabel->setFont ( font ) ;
 
 	curDir = settings.value("RecentFiles/LastDir", curDir).toString();
 	lastSearch = settings.value("TextSearch/LastPhrase", lastSearch).toString();
@@ -682,10 +687,12 @@ void TextRoom::readSettings()
 
 	if ( isPlainText )
 	{
+		textEdit->document()->blockSignals(true);
 		QString text( textEdit->document()->toPlainText() );
 		textEdit->document()->clear();
 		textEdit->insertPlainText(text);
 		textEdit->setAcceptRichText( false );
+		textEdit->document()->blockSignals(false);
 	}
 	else
 	{
@@ -723,6 +730,10 @@ void TextRoom::readSettings()
 		if ( (isSaveCursor = settings.value("RecentFiles/SavePosition", true).toBool() ))
 			cPosition = settings.value("RecentFiles/AtPosition", cPosition).toInt();
 	}
+
+	wordCountChanged = true;
+	getFileStatus();
+	sCursor();
 }
 
 void TextRoom::writeSettings()
@@ -782,57 +793,55 @@ void TextRoom::help()
 {
 	if (!helpDialog->isVisible())
 	{
-	int x = (width()/2)-351;
-	int y = (height()/2)-150;
-	helpDialog->move(x,y);
-	helpDialog->setWindowFlags(Qt::FramelessWindowHint);
-	helpDialog->showNormal();
+		int x = (width()/2)-351;
+		int y = (height()/2)-150;
+		helpDialog->move(x,y);
+		helpDialog->setWindowFlags(Qt::FramelessWindowHint);
+		helpDialog->showNormal();
 	}
 	else
 	{
-	helpDialog->hide();
+		helpDialog->hide();
 	}
 }
 
 void TextRoom::loadStyleSheet(const QString &fcolor, const QString &bcolor, const QString &scolor)
 {
-
-        QColor textColor;
-        textColor.setNamedColor(fcolor);
-        QColor backgroundColor;
-        backgroundColor.setNamedColor(bcolor);
-        QColor statusbarColor;
-        statusbarColor.setNamedColor(scolor);
-        QPalette palette;
-        palette.setColor(QPalette::Text, textColor);
-        palette.setColor(QPalette::Base, QColor(0, 0, 0, 0));
+	QColor textColor;
+	textColor.setNamedColor(fcolor);
+	QColor backgroundColor;
+	backgroundColor.setNamedColor(bcolor);
+	QColor statusbarColor;
+	statusbarColor.setNamedColor(scolor);
+	QPalette palette;
+	palette.setColor(QPalette::Text, textColor);
+	palette.setColor(QPalette::Base, QColor(0, 0, 0, 0));
 	textEdit->setPalette(palette);
 
-        QPalette bgPalette;
-        if ( backgroundImage == 0 )
-        {
-        bgPalette.setColor(QPalette::Window, backgroundColor);
-        }
-        else
-        {
-        QPixmap bgmain;
-        bgmain.load( backgroundImage );
-        QDesktopWidget* desktopWidget = QApplication::desktop();
-        QRect rect = desktopWidget->geometry();
-        QSize size(rect.width() , rect.height());
-        QPixmap bg(bgmain.scaled(size));
-        bgPalette.setBrush(QPalette::Window, bg);
-        }
-        TextRoom::setPalette(bgPalette);
+	QPalette bgPalette;
+	if ( backgroundImage == 0 )
+	{
+		bgPalette.setColor(QPalette::Window, backgroundColor);
+	}
+	else
+	{
+		QPixmap bgmain;
+		bgmain.load( backgroundImage );
+		QDesktopWidget* desktopWidget = QApplication::desktop();
+		QRect rect = desktopWidget->geometry();
+		QSize size(rect.width() , rect.height());
+		QPixmap bg(bgmain.scaled(size));
+		bgPalette.setBrush(QPalette::Window, bg);
+	}
+	TextRoom::setPalette(bgPalette);
 
 	QPalette palette2;
-        palette2.setColor(QPalette::WindowText, statusbarColor);
-        palette2.setColor(QPalette::Window, QColor(0, 0, 0, 0));
+	palette2.setColor(QPalette::WindowText, statusbarColor);
+	palette2.setColor(QPalette::Window, QColor(0, 0, 0, 0));
 
 	horizontalSlider->setPalette(palette2);
 	statsLabel->setPalette(palette2);
 	deadlineLabel->setPalette(palette2);
-	
 }
 
 void TextRoom::find()
@@ -871,18 +880,17 @@ void TextRoom::sCursor()
 void TextRoom::resizeEvent(QResizeEvent *event)
 {
 	update();
-	sCursor();
 	QWidget::resizeEvent(event);
-
+	sCursor();
 }
 
 void TextRoom::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
 {
     if ( !isPlainText )
     {
-	QTextCursor cursor = textEdit->textCursor();
-	cursor.mergeCharFormat(format);
-	textEdit->mergeCurrentCharFormat(format);
+		QTextCursor cursor = textEdit->textCursor();
+		cursor.mergeCharFormat(format);
+		textEdit->mergeCurrentCharFormat(format);
     }
 }
 
@@ -989,18 +997,18 @@ void TextRoom::print()
 
 void TextRoom::about()
 {
-        if (!aboutDialog->isVisible())
-        {
-        int x = (width()/2)-171;
-        int y = (height()/2)-171;
-        aboutDialog->move(x,y);
-        aboutDialog->setWindowFlags(Qt::FramelessWindowHint);
-        aboutDialog->showNormal();
-        }
-        else
-        {
-        aboutDialog->hide();
-        }
+	if (!aboutDialog->isVisible())
+	{
+		int x = (width()/2)-171;
+		int y = (height()/2)-171;
+		aboutDialog->move(x,y);
+		aboutDialog->setWindowFlags(Qt::FramelessWindowHint);
+		aboutDialog->showNormal();
+	}
+	else
+	{
+		aboutDialog->hide();
+	}
 }
 
 void TextRoom::spellCheck()
