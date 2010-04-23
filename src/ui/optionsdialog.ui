@@ -37,9 +37,6 @@
   <property name="styleSheet">
    <string notr="true"/>
   </property>
-  <property name="locale">
-   <locale language="English" country="UnitedStates"/>
-  </property>
   <layout class="QGridLayout">
    <item row="0" column="0">
     <layout class="QHBoxLayout"/>
@@ -641,7 +638,7 @@ p, li { white-space: pre-wrap; }
       <attribute name="title">
        <string>Appearance</string>
       </attribute>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QWidget" name="layoutWidget_8">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -1456,9 +1453,6 @@ p, li { white-space: pre-wrap; }
          <layout class="QHBoxLayout">
           <item>
            <widget class="QCalendarWidget" name="calendarWidget">
-            <property name="locale">
-             <locale language="English" country="UnitedStates"/>
-            </property>
            </widget>
           </item>
          </layout>

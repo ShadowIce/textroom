@@ -88,9 +88,6 @@
   <property name="styleSheet">
    <string/>
   </property>
-  <property name="locale">
-   <locale language="English" country="UnitedStates"/>
-  </property>
   <layout class="QVBoxLayout">
    <property name="spacing">
     <number>0</number>
@@ -262,9 +259,6 @@
        </property>
        <property name="styleSheet">
         <string notr="true"/>
-       </property>
-       <property name="locale">
-        <locale language="English" country="UnitedStates"/>
        </property>
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
@@ -438,9 +432,6 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="styleSheet">
         <string notr="true"/>
-       </property>
-       <property name="locale">
-        <locale language="English" country="UnitedStates"/>
        </property>
        <property name="frameShape">
         <enum>QFrame::Panel</enum>
