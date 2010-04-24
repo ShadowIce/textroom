@@ -28,7 +28,6 @@
 ****************************************************************************/
 
 #include <QtGui> 
-#include <QStyle>
 #include "textroom.h"
 #include "optionsdialog.h"
 #include "helpdialog.h"
@@ -65,7 +64,7 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 
 // Sound adjustments.
         int audio_rate = 11025;
-        Uint16 audio_format = AUDIO_S8;
+        Uint16 audio_format = AUDIO_S16SYS;
         int audio_channels = 2;
 	int audio_buffers = 1024;
 	
