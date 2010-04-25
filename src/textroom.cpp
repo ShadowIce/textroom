@@ -71,9 +71,6 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	int audio_rate = 44100;
 	Uint16 audio_format = AUDIO_S16SYS;
 	int audio_channels = 2;
-        int audio_rate = 11025;
-        Uint16 audio_format = AUDIO_S16SYS;
-        int audio_channels = 2;
 	int audio_buffers = 1024;
 	
 	if ( SDL_Init(SDL_INIT_AUDIO) < 0 ) {
