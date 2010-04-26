@@ -37,8 +37,8 @@ OptionsDialog::OptionsDialog(QWidget *parent)
 {
 	ui.setupUi(this);
 	reaSettings();
-        QPlastiqueStyle * style = new QPlastiqueStyle();
-        OptionsDialog::setStyle(style);
+	QPlastiqueStyle * style = new QPlastiqueStyle();
+	OptionsDialog::setStyle(style);
 
 	connect(ui.pushButton, SIGNAL( clicked() ), this, SLOT( startAlarm() ) );
 	connect(ui.browseButton, SIGNAL( clicked() ), this, SLOT( selectDir() ) );
@@ -48,14 +48,14 @@ void OptionsDialog::startAlarm()
 {
 	if (ui.spinBox->value() > 0)
 	{
-	setAlarm = ui.spinBox->value();
-	writSettings();
-	close();	
+		setAlarm = ui.spinBox->value();
+		writSettings();
+		close();
 	}
 	else
 	{
-	setAlarm = 0;
-	writSettings();
+		setAlarm = 0;
+		writSettings();
 	}
 }
 
@@ -79,12 +79,12 @@ void OptionsDialog::reaSettings()
 	QStringList fontS;
 	QFont font;
 	QFont defaultFont;
-
-                 font.fromString( settings.value("StatusFont").toString() );
-                 defaultFont.fromString( settings.value("DefaultFont").toString() );
-
-        ui.statusbarFontComboBox->setCurrentFont(font);
-        ui.fontComboBox->setCurrentFont(defaultFont);
+	
+	font.fromString( settings.value("StatusFont").toString() );
+	defaultFont.fromString( settings.value("DefaultFont").toString() );
+	
+	ui.statusbarFontComboBox->setCurrentFont(font);
+	ui.fontComboBox->setCurrentFont(defaultFont);
 	
 	ui.loadOnStartCheckBox->setChecked( settings.value( "RecentFiles/OpenLastFile", true ).toBool() );
 	ui.saveCursorCheckBox->setChecked( settings.value( "RecentFiles/SavePosition", true ).toBool() );
@@ -104,59 +104,60 @@ void OptionsDialog::reaSettings()
 	ui.pageCountCheckBox->setChecked( settings.value("PageCount", false).toBool() );
 	ui.soundCheckBox->setChecked( settings.value("Sound", true).toBool() );
 	ui.characterCountCheckBox->setChecked( settings.value("CharacterCount", false).toBool() );
-        QString datetext = settings.value("Deadline", todaytext).toString();
-        date = QDate::fromString(datetext, "yyyyMMdd");
-        ui.calendarWidget->setSelectedDate(date);
+	QString datetext = settings.value("Deadline", todaytext).toString();
+	date = QDate::fromString(datetext, "yyyyMMdd");
+	ui.calendarWidget->setSelectedDate(date);
 	ui.editorWidthSpinBox->setValue( settings.value	("EditorWidth", 800).toInt());  
 	ui.editorTopSpaceSpinBox->setValue( settings.value("EditorTopSpace", 0).toInt());
 	ui.editorBottomSpaceSpinBox->setValue( settings.value("EditorBottomSpace", 0).toInt());
 	ui.spinBox->setValue( settings.value("TimedWriting", 0 ).toInt());
-        ui.dateComboBox->setCurrentIndex( settings.value("DateFormatInt", 0 ).toInt() );
+	setAlarm = 0;
+	ui.dateComboBox->setCurrentIndex( settings.value("DateFormatInt", 0 ).toInt() );
 	ui.defaultSaveLocationLineEdit->setText( settings.value("DefaultDirectory", "").toString() );
-        ui.twentyfourCheckBox->setChecked( settings.value("24-Hour" , true).toBool() );
-        ui.backgroundLineEdit->setText( settings.value("BackgroundImage", "").toString() );
-        ui.statusbarBoldCheckBox->setChecked( settings.value("BoldStatus", false).toBool() );
-        ui.statusbarItalicCheckBox->setChecked( settings.value("ItalicStatus", false).toBool() );
-        ui.statusbarSpinBox->setValue( settings.value("SizeStatus", 12).toInt() );
-        ui.fontSizeSpinBox->setValue( settings.value("DefaultFontSize", 12).toInt() );
-        ui.plaintextCheckBox->setChecked( settings.value("PlainText", false).toBool() );
-        ui.languageComboBox->setCurrentIndex( settings.value("Language", 0).toInt() );
-
+	ui.twentyfourCheckBox->setChecked( settings.value("24-Hour" , true).toBool() );
+	ui.backgroundLineEdit->setText( settings.value("BackgroundImage", "").toString() );
+	ui.statusbarBoldCheckBox->setChecked( settings.value("BoldStatus", false).toBool() );
+	ui.statusbarItalicCheckBox->setChecked( settings.value("ItalicStatus", false).toBool() );
+	ui.statusbarSpinBox->setValue( settings.value("SizeStatus", 12).toInt() );
+	ui.fontSizeSpinBox->setValue( settings.value("DefaultFontSize", 12).toInt() );
+	ui.plaintextCheckBox->setChecked( settings.value("PlainText", false).toBool() );
+	ui.languageComboBox->setCurrentIndex( settings.value("Language", 0).toInt() );
+	
 	QPalette palette;
 	
-        fcolor.setNamedColor( settings.value("Colors/FontColor", "#808080" ).toString() );
-        palette.setColor(ui.pbFontColor->backgroundRole(), fcolor );
+	fcolor.setNamedColor( settings.value("Colors/FontColor", "#808080" ).toString() );
+	palette.setColor(ui.pbFontColor->backgroundRole(), fcolor );
 	ui.pbFontColor->setPalette(palette);	
-
-        scolor.setNamedColor( settings.value("Colors/StatusColor", "#202020" ).toString() );
-        palette.setColor(ui.pbStatusBarColor->backgroundRole(), scolor );
-	ui.pbStatusBarColor->setPalette(palette);
-
 	
-        bgcolor.setNamedColor( settings.value("Colors/Background", "#000000" ).toString() );
-        palette.setColor(ui.pbEditorBackColor->backgroundRole(), bgcolor );
+	scolor.setNamedColor( settings.value("Colors/StatusColor", "#202020" ).toString() );
+	palette.setColor(ui.pbStatusBarColor->backgroundRole(), scolor );
+	ui.pbStatusBarColor->setPalette(palette);
+	
+	
+	bgcolor.setNamedColor( settings.value("Colors/Background", "#000000" ).toString() );
+	palette.setColor(ui.pbEditorBackColor->backgroundRole(), bgcolor );
 	ui.pbEditorBackColor->setPalette(palette);
 	
 }
 
 void OptionsDialog::writSettings()
 {
-
+	
 #ifdef Q_OS_WIN32
 	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
-
+	
 	QSettings settings;
 #endif
-
-        settings.setValue("Colors/FontColor", fcolor.name() );
-        settings.setValue("Colors/Background", bgcolor.name() );
-        settings.setValue("Colors/StatusColor", scolor.name() );
-
+	
+	settings.setValue("Colors/FontColor", fcolor.name() );
+	settings.setValue("Colors/Background", bgcolor.name() );
+	settings.setValue("Colors/StatusColor", scolor.name() );
+	
 	settings.setValue("RecentFiles/OpenLastFile", ui.loadOnStartCheckBox->isChecked() );
 	settings.setValue("RecentFiles/SavePosition", ui.saveCursorCheckBox->isChecked() );
 	settings.setValue("ScrollBar", ui.scrollBarCheckBox->isChecked() );
-
+	
 	settings.setValue("WindowState/ShowFullScreen", ui.fullScreenCheckBox->isChecked() );
 	settings.setValue("WindowState/ShowSplashScreen", ui.splashScreenCheckBox->isChecked() );
 	settings.setValue("Sound", ui.soundCheckBox->isChecked() );
@@ -171,31 +172,30 @@ void OptionsDialog::writSettings()
 	settings.setValue("EditorTopSpace", ui.editorTopSpaceSpinBox->value() );
 	settings.setValue("EditorBottomSpace", ui.editorBottomSpaceSpinBox->value() );
 	settings.setValue("PageCountFormula", ui.pageCountSpinBox->value() );
-        settings.setValue("DateFormatInt", ui.dateComboBox->currentIndex() );
-        settings.setValue("DateFormat", ui.dateComboBox->currentText() );
+	settings.setValue("DateFormatInt", ui.dateComboBox->currentIndex() );
+	settings.setValue("DateFormat", ui.dateComboBox->currentText() );
 	settings.setValue("DefaultDirectory", ui.defaultSaveLocationLineEdit->text() );
-        settings.setValue("24-Hour", ui.twentyfourCheckBox->isChecked() );
-        settings.setValue("BackgroundImage", ui.backgroundLineEdit->text() );
-        settings.setValue("BoldStatus", ui.statusbarBoldCheckBox->isChecked() );
-        settings.setValue("ItalicStatus", ui.statusbarItalicCheckBox->isChecked() );
-        settings.setValue("SizeStatus", ui.statusbarSpinBox->value() );
-        settings.setValue("DefaultFontSize", ui.fontSizeSpinBox->value() );
-        settings.setValue("PlainText", ui.plaintextCheckBox->isChecked() );
-        settings.setValue("Language", ui.languageComboBox->currentIndex() );
+	settings.setValue("24-Hour", ui.twentyfourCheckBox->isChecked() );
+	settings.setValue("BackgroundImage", ui.backgroundLineEdit->text() );
+	settings.setValue("BoldStatus", ui.statusbarBoldCheckBox->isChecked() );
+	settings.setValue("ItalicStatus", ui.statusbarItalicCheckBox->isChecked() );
+	settings.setValue("SizeStatus", ui.statusbarSpinBox->value() );
+	settings.setValue("DefaultFontSize", ui.fontSizeSpinBox->value() );
+	settings.setValue("PlainText", ui.plaintextCheckBox->isChecked() );
+	settings.setValue("Language", ui.languageComboBox->currentIndex() );
 	
 	QFont font;
 	QFont defaultFont;
 	
 	font = ui.statusbarFontComboBox->currentFont();
-        font.setBold( ui.statusbarBoldCheckBox->isChecked() );
-        font.setItalic( ui.statusbarItalicCheckBox->isChecked() );
+	font.setBold( ui.statusbarBoldCheckBox->isChecked() );
+	font.setItalic( ui.statusbarItalicCheckBox->isChecked() );
 	font.setPointSize(ui.statusbarSpinBox->value() );
-        settings.setValue("StatusFont", font.toString() );
-
+	settings.setValue("StatusFont", font.toString() );
+		
 	defaultFont = ui.fontComboBox->currentFont();
 	defaultFont.setPointSize(ui.fontSizeSpinBox->value() );
-        settings.setValue("DefaultFont", defaultFont.toString() );
-   	
+	settings.setValue("DefaultFont", defaultFont.toString() );
 }
 
 void OptionsDialog::on_pushButtonOk_clicked()
@@ -268,21 +268,21 @@ void OptionsDialog::showFontColorDialog()
 
 void OptionsDialog::on_backgroundImagePushButton_clicked()
 {
-                QString fileName = QFileDialog::getOpenFileName(this, tr("Select Image"), QDir::homePath());
-                if (!fileName.isEmpty())
-                {
-                        ui.backgroundLineEdit->setText(fileName);
-                }
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select Image"), QDir::homePath());
+	if (!fileName.isEmpty())
+	{
+		ui.backgroundLineEdit->setText(fileName);
+	}
 }
 
 void OptionsDialog::on_restorePushButton_clicked()
 {
 #ifdef Q_OS_WIN32
-        QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
+	QSettings settings(QDir::homePath()+"/Application Data/"+qApp->applicationName()+".ini", QSettings::IniFormat);
 #else
-
-        QSettings settings;
+	
+	QSettings settings;
 #endif
-        settings.clear();
-        reaSettings();
-    }
+	settings.clear();
+	reaSettings();
+}

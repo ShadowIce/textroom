@@ -47,9 +47,9 @@ private slots:
 	void on_pushButtonOk_clicked();
 	void on_pbFontColor_clicked();
 	void on_pbEditorBackColor_clicked();
-        void on_pbStatusBarColor_clicked();
-        void on_backgroundImagePushButton_clicked();
-        void on_restorePushButton_clicked();
+	void on_pbStatusBarColor_clicked();
+	void on_backgroundImagePushButton_clicked();
+	void on_restorePushButton_clicked();
 	void showFontColorDialog();
 	void showBackgroundDialog();
 	void showStatusColorDialog();
@@ -57,13 +57,13 @@ private slots:
 	void selectDir();
 
 private:
-        QColor fcolor;
-        QColor bgcolor;
-        QColor scolor;
-        QColor sbcolor;
+	QColor fcolor;
+	QColor bgcolor;
+	QColor scolor;
+	QColor sbcolor;
 	int setAlarm;
 	QString dirSelected;
-        QDate date;
+	QDate date;
 
 private:
 

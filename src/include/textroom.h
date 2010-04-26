@@ -47,12 +47,12 @@ struct Mix_Chunk;
 class TextRoom : public QWidget, public Ui::TextRoomMain
 {
 	Q_OBJECT
- 
+		
 public:
 	TextRoom(QWidget *parent = 0, Qt::WFlags f = 0 );
-
+	
 private slots:
-
+	
 	void open();
 	bool save();
 	bool saveAs();
@@ -153,12 +153,13 @@ private:
 	int channel;
 	Mix_Chunk *soundenter;
 	Mix_Chunk *soundany;
-
+	QTimer *writingTimer;
+	
 protected:
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent *event);	
 
 };
  
- 
+
 #endif

@@ -35,11 +35,11 @@
 #include "font.h"
 #include "about.h"
 #include "SDL/SDL.h"
-// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:  #include "SDL_mixer/SDL_mixer.h"
+// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:	 #include "SDL_mixer/SDL_mixer.h"
 #include "SDL/SDL_mixer.h"
 #include "iostream"
 #include <SDL/SDL.h>
-// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:  #include <SDL_mixer/SDL_mixer.h>
+// *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:	 #include <SDL_mixer/SDL_mixer.h>
 #include <SDL/SDL_mixer.h>
 #include <iostream>
 #include <hunspell/hunspell.hxx>
@@ -49,6 +49,10 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 {
 	setupUi(this);
 	setObjectName("textroom");
+
+	writingTimer = new QTimer(this);
+	writingTimer->setSingleShot(true);
+	connect(writingTimer, SIGNAL(timeout()), this, SLOT(alarmTime()));
 	
 // Read settings saved by Options Dialog.
 	readSettings();
@@ -223,7 +227,7 @@ void TextRoom::insertDate()
 	QString date = today.toString(dateFormat);
 	setWindowModified(textEdit->document()->isModified());
 
-        textEdit->insertPlainText(date);
+	textEdit->insertPlainText(date);
 }
 
 void TextRoom::insertTime()
@@ -233,7 +237,7 @@ void TextRoom::insertTime()
 	QString clock = now.toString(timeFormat);
 	setWindowModified(textEdit->document()->isModified());
 
-        textEdit->insertPlainText(clock);
+	textEdit->insertPlainText(clock);
 }
 
 void TextRoom::toggleFullScreen()
@@ -296,22 +300,22 @@ void TextRoom::open()
 		if ( curDir.isEmpty() )
 		{
 			dirToOpen = QDir::homePath();
-	   	}
-	   	else
-	   	{
-	   		dirToOpen = curDir;
-	  	}
+		}
+		else
+		{
+			dirToOpen = curDir;
+		}
 		QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), dirToOpen);
 		if (!fileName.isEmpty())
 		{
 			loadFile(fileName);
-	   	}
+		}
 	}
 }
 
 bool TextRoom::save()
 {
-        if (curFile.isEmpty() || !QFileInfo(curFile).isWritable() || shownName == "Untitled.txr")
+	if (curFile.isEmpty() || !QFileInfo(curFile).isWritable() || shownName == "Untitled.txr")
 	{
 		return saveAs();
 	}
@@ -323,16 +327,16 @@ bool TextRoom::save()
 
 bool TextRoom::saveAs()
 {
-        QString extension;
-        if ( isPlainText )
-        {
-            extension = "*.txt";
-        }
-        else
-        {
-            extension = "*.txr";
-        }
-        QString fileName = QFileDialog::getSaveFileName(this, "Save As", defaultDir + "/" + extension, "TextRoom Documents (*.txr);;Html Files (*.htm *.html);;Text Documents (*.txt)");
+	QString extension;
+	if ( isPlainText )
+	{
+		extension = "*.txt";
+	}
+	else
+	{
+		extension = "*.txr";
+	}
+	QString fileName = QFileDialog::getSaveFileName(this, "Save As", defaultDir + "/" + extension, "TextRoom Documents (*.txr);;Html Files (*.htm *.html);;Text Documents (*.txt)");
 	if (!fileName.isEmpty())
 	{
 		return saveFile(fileName);
@@ -345,9 +349,9 @@ bool TextRoom::saveAs()
 
 void TextRoom::autoSave()
 {
-        if (shownName == "Untitled.txr")
+	if (shownName == "Untitled.txr")
 	{
-                QString fileName = defaultDir + "/UntitledAutoSaved.txr";
+		QString fileName = defaultDir + "/UntitledAutoSaved.txr";
 		saveFile(fileName);
 	}
 	else
@@ -435,7 +439,7 @@ bool TextRoom::saveFile(const QString &fileName)
 
 // If filename extension is .txt then convert to plain text or Only Plain Text Option is selected.
 	QApplication::setOverrideCursor(Qt::WaitCursor);
-        if (fileName.endsWith("txt") || isPlainText )
+	if (fileName.endsWith("txt") || isPlainText )
 	{
 		out << textEdit->document()->toPlainText();
 	}
@@ -462,13 +466,13 @@ void TextRoom::setCurrentFile(const QString &fileName)
 
 	if (curFile.isEmpty())
 	{
-                shownName = "Untitled.txr";
-   	}
+		shownName = "Untitled.txr";
+	}
 	else
 	{
 		shownName = strippedName(curFile);
 		curDir = f.absolutePath();
-   	}
+	}
 	setWindowTitle(tr("%1[*] - %2").arg(shownName).arg( qApp->applicationName() ));
 }
 
@@ -627,7 +631,7 @@ void TextRoom::readSettings()
 	{
 		if ( !isFullScreen() )
 			showFullScreen();
-   	}
+	}
 	else
 	{
 		showNormal();
@@ -712,9 +716,9 @@ void TextRoom::readSettings()
 	bottomSpacer->changeSize(20, editorBottomSpace, QSizePolicy::Maximum, QSizePolicy::Maximum);
 	
 	timeOut = alarm * 60000;
-	if (alarm != 0)
+	if (alarm > 0)
 	{
-		QTimer::singleShot(timeOut, this, SLOT(alarmTime()));
+		writingTimer->start(timeOut);
 	}
 	
 	textEdit->setMaximumWidth(editorWidth);
@@ -882,12 +886,12 @@ void TextRoom::resizeEvent(QResizeEvent *event)
 
 void TextRoom::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
 {
-    if ( !isPlainText )
-    {
+	if ( !isPlainText )
+	{
 		QTextCursor cursor = textEdit->textCursor();
 		cursor.mergeCharFormat(format);
 		textEdit->mergeCurrentCharFormat(format);
-    }
+	}
 }
 
 void TextRoom::textBold()
@@ -950,9 +954,9 @@ void TextRoom::changeFont()
 		QSettings settings;
 	#endif
 
-                QString currentFormat = settings.value("FontFamily", textEdit->textCursor().charFormat().fontFamily() ).toString();
+		QString currentFormat = settings.value("FontFamily", textEdit->textCursor().charFormat().fontFamily() ).toString();
 		QTextCharFormat fmt;
-                QString fontcolor = settings.value("FontColor", "000000").toString();
+		QString fontcolor = settings.value("FontColor", "000000").toString();
 		QColor color;
 		color.setNamedColor(fontcolor);
 		QBrush brush(color, Qt::SolidPattern);
@@ -981,14 +985,14 @@ void TextRoom::hSliderPositionChanged()
 
 void TextRoom::print()
 {
-     QTextDocument *document = textEdit->document();
-     QPrinter printer;
+	 QTextDocument *document = textEdit->document();
+	 QPrinter printer;
 
-     QPrintDialog *dlg = new QPrintDialog(&printer, this);
-     if (dlg->exec() != QDialog::Accepted)
-         return;
+	 QPrintDialog *dlg = new QPrintDialog(&printer, this);
+	 if (dlg->exec() != QDialog::Accepted)
+	 return;
 
-     document->print(&printer);
+	 document->print(&printer);
 }
 
 void TextRoom::about()
