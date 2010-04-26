@@ -16,3 +16,4 @@ images/
 *.idb
 *.pdb
 *.dll
+.emacs.desktop
