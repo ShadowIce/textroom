@@ -179,10 +179,8 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	// set cursor position
 	if ( isSaveCursor )
 	{
-		QTextCursor c;
-		c = textEdit->textCursor();
-		c.setPosition(cPosition);
-		textEdit->setTextCursor(c);
+		textEdit->textCursor().setPosition(
+			qMin(cPosition, textEdit->toPlainText().length()));
 	}
 
 	writeSettings();
