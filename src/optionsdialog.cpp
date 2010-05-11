@@ -121,6 +121,7 @@ void OptionsDialog::reaSettings()
         ui.fontSizeSpinBox->setValue( settings.value("DefaultFontSize", 12).toInt() );
         ui.plaintextCheckBox->setChecked( settings.value("PlainText", false).toBool() );
         ui.languageComboBox->setCurrentIndex( settings.value("Language", 0).toInt() );
+	ui.indentSpinBox->setValue( settings.value("Indent", 50).toInt() );
 
 	QPalette palette;
 	
@@ -182,6 +183,7 @@ void OptionsDialog::writSettings()
         settings.setValue("DefaultFontSize", ui.fontSizeSpinBox->value() );
         settings.setValue("PlainText", ui.plaintextCheckBox->isChecked() );
         settings.setValue("Language", ui.languageComboBox->currentIndex() );
+	settings.setValue("Indent", ui.indentSpinBox->value() );
 	
 	QFont font;
 	QFont defaultFont;

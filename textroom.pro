@@ -20,11 +20,13 @@ HEADERS += src/include/helpdialog.h \
     src/include/textroom.h \
     src/include/searchdialog.h \
     src/include/font.h \
+    src/include/scratchpad.h \
     src/include/about.h
 FORMS += ui/optionsdialog.ui \
     src/ui/textroom.ui \
     src/ui/helpdialog.ui \
     src/ui/font.ui \
+    src/ui/scratchpad.ui \
     src/ui/about.ui
 SOURCES += src/helpdialog.cpp \
     src/main.cpp \
@@ -32,6 +34,7 @@ SOURCES += src/helpdialog.cpp \
     src/textroom.cpp \
     src/searchdialog.cpp \
     src/font.cpp \
+    src/scratchpad.cpp \
     src/about.cpp
 RESOURCES += resource/textroom.qrc
 CONFIG += release \

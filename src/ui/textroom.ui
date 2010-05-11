@@ -251,6 +251,9 @@
          <pointsize>11</pointsize>
         </font>
        </property>
+       <property name="mouseTracking">
+        <bool>false</bool>
+       </property>
        <property name="focusPolicy">
         <enum>Qt::WheelFocus</enum>
        </property>
@@ -438,9 +441,6 @@ p, li { white-space: pre-wrap; }
        </property>
        <property name="styleSheet">
         <string notr="true"/>
-       </property>
-       <property name="locale">
-        <locale language="English" country="UnitedStates"/>
        </property>
        <property name="frameShape">
         <enum>QFrame::Panel</enum>

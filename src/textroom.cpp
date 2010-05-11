@@ -34,6 +34,7 @@
 #include "searchdialog.h"
 #include "font.h"
 #include "about.h"
+#include "scratchpad.h"
 #include "SDL/SDL.h"
 // *** IF USING XCODE ON MACOS X, CHANGE THE FOLLOWING LINE TO:  #include "SDL_mixer/SDL_mixer.h"
 #include "SDL/SDL_mixer.h"
@@ -61,6 +62,7 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
 	helpDialog = new HelpDialog(this);
 	selectFont = new SelectFont(this);
         aboutDialog = new AboutDialog(this);
+	scratchDialog = new ScratchDialog(this);
 
 // Sound adjustments.
         int audio_rate = 11025;
@@ -98,6 +100,7 @@ TextRoom::TextRoom(QWidget *parent, Qt::WFlags f)
         new QShortcut ( QKeySequence(tr("F2", "Options")), this, SLOT( options() ) );
         new QShortcut ( QKeySequence(tr("F3", "About")), this, SLOT( about() ) );
         new QShortcut ( QKeySequence(tr("F5", "Spell Check")), this, SLOT( spellCheck() ) );
+        new QShortcut ( QKeySequence(tr("F6", "Scratch Pad")), this, SLOT( showScratchPad() ) );
         new QShortcut ( QKeySequence(tr("Ctrl+P", "Print")), this, SLOT( print() ) );
 	new QShortcut ( QKeySequence(tr("Shift+Ctrl+S", "Save As")), this, SLOT( saveAs() ) );
 	new QShortcut ( QKeySequence(tr("Ctrl+D", "Insert Date")), this, SLOT( insertDate() ) );
@@ -192,10 +195,11 @@ void TextRoom::playSound(Mix_Chunk *sound)
 void TextRoom::togleEscape()
 {
 // Toggle Fullscreen or if visible hide Help when ESC is pressed.
-        if ( helpDialog->isVisible() || aboutDialog->isVisible()  )
+        if ( helpDialog->isVisible() || aboutDialog->isVisible() || scratchDialog->isVisible() )
 	{
 	helpDialog->hide();
         aboutDialog->hide();
+	scratchDialog->hide();
 	}
 	else if ( isFullScreen() )
 		togleFullScreen();
@@ -266,6 +270,7 @@ void TextRoom::newFile()
 	{
 		textEdit->document()->blockSignals(true);
 		textEdit->clear();
+		scratchDialog->ui.scratchTextEdit->clear();
 		textEdit->document()->blockSignals(false);
 		
 		setCurrentFile("");
@@ -273,6 +278,7 @@ void TextRoom::newFile()
 		textEdit->document()->setModified(false);
 		textEdit->verticalScrollBar()->setValue(0);
                 textEdit->setFont(defaultFont);
+		indentLines(indentValue);
 	}
 }
 
@@ -360,18 +366,23 @@ void TextRoom::loadFile(const QString &fileName)
 
         QByteArray data = file.readAll();
 	QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-	QString str = codec->toUnicode(data);
-	
+	QString strall = codec->toUnicode(data);
+	QStringList strlist = strall.split("\n<split>\n", QString::SkipEmptyParts);
+	QString strscratch = strlist.at(0);
+	QString strdoc = strlist.at(1);
+
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
 	file.seek(0);
 	textEdit->document()->blockSignals(true);
 	textEdit->setPlainText("");
 	textEdit->setUndoRedoEnabled(false);
-	textEdit->append(str);
+	textEdit->append(strdoc);
 	textEdit->moveCursor(QTextCursor::Start);
 	textEdit->setUndoRedoEnabled(true);
 	textEdit->document()->blockSignals(false);
+	scratchDialog->ui.scratchTextEdit->setPlainText("");
+	scratchDialog->ui.scratchTextEdit->append(strscratch);
 
 	QApplication::restoreOverrideCursor();
 
@@ -382,6 +393,7 @@ void TextRoom::loadFile(const QString &fileName)
 	}
 	QString text = textEdit->document()->toPlainText();
 	parasold = text.count("\n", Qt::CaseSensitive);
+	indentLines(indentValue);
 	vPositionChanged();
 	getFileStatus();
 }
@@ -426,6 +438,12 @@ bool TextRoom::saveFile(const QString &fileName)
         if (fileName.endsWith("txt") || isPlainText )
 	{
 		out << textEdit->document()->toPlainText();
+	}
+	else if (fileName.endsWith("txr"))
+	{
+		QByteArray ba = "utf-8";
+		
+		out <<scratchDialog->ui.scratchTextEdit->document()->toHtml(ba) << "\n<split>\n" << textEdit->document()->toHtml(ba);
 	}
 	else
 	{
@@ -551,7 +569,6 @@ void TextRoom::getFileStatus()
 	}
         deadlineLabel->setText(showdeadline + clock);
         statsLabel->setText("Words:" + selectedText + tr("%1").arg(words) + target);
-
 }
 
 void TextRoom::documentWasModified()
@@ -668,6 +685,9 @@ void TextRoom::readSettings()
         backgroundImage = settings.value("BackgroundImage", "").toString();
         isPlainText = settings.value("PlainText", false).toBool();
         language = settings.value("Language", 0).toInt();
+	indentValue = settings.value("Indent", 50).toInt();
+
+	indentLines(indentValue);
 
         if ( isPlainText )
         {
@@ -994,6 +1014,14 @@ void TextRoom::about()
 
 void TextRoom::spellCheck()
 {
+	bool silent = true;
+	if (isSound)
+	{
+		isSound = false;
+		silent = false;
+	}
+	else
+		silent = true;
               QString textVar = textEdit->document()->toPlainText();
               textVar.replace(" ", "+");
               textVar.replace("\n", "+");
@@ -1014,8 +1042,8 @@ void TextRoom::spellCheck()
               textVar.replace("\"", "+");
               QStringList wordList = textVar.split("+", QString::SkipEmptyParts);
 
-              char * affFile;
-              char * dicFile;
+              char * affFile = (char *) "/usr/share/myspell/dicts/en_US.aff";
+              char * dicFile = (char *) "/usr/share/myspell/dicts/en_US.dic";
               if (language == 0)
               {
                     affFile = (char *) "/usr/share/myspell/dicts/en_US.aff";
@@ -1059,4 +1087,51 @@ void TextRoom::spellCheck()
                     highlightCursor.mergeCharFormat(defaultFormat);
                 }
               }
-          }
+	if (silent)
+		isSound = false;
+	else
+		isSound = true;
+}
+
+void TextRoom::showScratchPad()
+{
+        if (!scratchDialog->isVisible())
+        {
+        int x = (width()/2)-171;
+        int y = (height()/2)-171;
+	scratchDialog->move(x, y);
+        scratchDialog->setWindowFlags(Qt::FramelessWindowHint);
+        scratchDialog->showNormal();
+        }
+        else
+        {
+        scratchDialog->hide();
+        }
+}
+
+void TextRoom::indentLines(int value)
+{
+	bool silent = true;
+	if (isSound)
+	{
+		isSound = false;
+		silent = false;
+	}
+	else
+		silent = true;
+	QString text = textEdit->document()->toPlainText();
+	int paras = text.count("\n", Qt::CaseSensitive)+1;
+	QTextCursor tc = textEdit->textCursor();
+        tc.movePosition(QTextCursor::Start);
+	for (int i=0; i<paras; i++)
+	{
+	QTextBlockFormat tfor;
+	tfor.setTextIndent(value);
+	tc.mergeBlockFormat(tfor);
+	tc.movePosition(QTextCursor::NextBlock);
+	}
+	if (silent)
+		isSound = false;
+	else
+		isSound = true;
+}

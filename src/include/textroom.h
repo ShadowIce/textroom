@@ -47,6 +47,7 @@ class SelectFont;
 class AboutDialog;
 class AspellConfig;
 class AspellSpeller;
+class ScratchDialog;
 class Hunspell;
 
 class TextRoom : public QWidget, public Ui::TextRoomMain
@@ -87,6 +88,7 @@ private slots:
 	void changeFont();
 	void vPositionChanged();
 	void hSliderPositionChanged();
+	void showScratchPad();
         void spellCheck();
 	 
 private:
@@ -99,6 +101,7 @@ private:
 	void loadFile(const QString &fileName);
 	void setCurrentFile(const QString &fileName);
 	void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
+	void indentLines(int value);
 
 	HelpDialog *helpDialog;
 	OptionsDialog *optionsDialog;
@@ -107,6 +110,7 @@ private:
         AboutDialog *aboutDialog;
         AspellConfig * spell_config;
         AspellSpeller * spell_checker;
+	ScratchDialog * scratchDialog;
         Hunspell * pMS;
 	Ui::TextRoomMain ui;
 	QString curFile;
@@ -147,6 +151,7 @@ private:
 	int pageCount;
 	int characterCount;
         int language;
+	int indentValue;
 	QString pageCountText;
 	QString pageText;
 	QString characterCountText;
@@ -175,7 +180,6 @@ private:
 protected:
 	void closeEvent(QCloseEvent *event);
 	void resizeEvent(QResizeEvent *event);	
-
 };
  
  
